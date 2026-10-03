@@ -1203,3 +1203,34 @@ Measured conclusion:
 
 Next controlled experiment:
 Use a one-mulligan DRAW_COUNT state, select `number = 1), and inspect the immediate hand/deck delta plus the next selection. This completes the 0/1/2 behavioral comparison.
+
+
+## 2026-10-03 — E001-CABT-44: DRAW_COUNT Number 1 Completes the 0/1/2 Contrast
+
+A controlled one-mulligan DRAW_COUNT state exposed options `[0, 1, 2]`. The probe selected raw `number = 1`.
+
+Measured transition:
+- Acting player's hand: `6 -> 7`, delta `+1`.
+- Acting player's deck: `47 -> 46`, delta `-1`.
+- Turn remained `0`.
+- The immediate next selection was `CARD / SETUP_BENCH_POKEMON`.
+- The next selection had `minCount = 0`, `maxCount = 2`, and two legal options, both with `playerIndex = 1`.
+
+Controlled comparison for a one-mulligan DRAW_COUNT state:
+- Number 0: hand/deck delta `0/0`; turn advanced to `1`; next selection was `MAIN / MAIN` in the observed episode.
+- Number 1: hand/deck delta `+1/-1`; turn stayed `0`; next selection was `SETUP_BENCH_POKEMON`.
+- Number 2: hand/deck delta `+2/-2`; turn stayed `0`; next selection was `SETUP_BENCH_POKEMON`.
+
+Measured conclusion:
+- The NUMBER payload directly controls how many cards are drawn in the DRAW_COUNT state.
+- For this one-mulligan condition, choosing a positive number keeps the battle in setup, while choosing zero advanced to the normal turn in the observed zero case.
+- The exact game-rule rationale for the permissible range `0..2` is still not promoted beyond the observed correlation with the opponent's one mulligan.
+
+Pattern/condition discipline:
+- Pattern: the available maximum was mulligans + 1 in all 17 sampled DRAW_COUNT states in E001-CABT-40.
+- Condition-specific evidence: the complete 0/1/2 behavioral contrast above was obtained for a one-mulligan state.
+- Causal evidence: selecting 0, 1, and 2 demonstrably changed the number of cards drawn in their respective controlled states.
+- Not yet established: whether the same exact post-selection transitions hold for every mulligan count or every branch.
+
+Next step:
+Stop expanding DRAW_COUNT probes for now. Promote the verified numeric behavior into the semantic action model, while keeping the mulligan interpretation explicitly conditional. Then move back to the main architecture: normalized state + legal-action decoding.
