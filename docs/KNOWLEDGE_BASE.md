@@ -1062,3 +1062,33 @@ Additional note:
 
 Next controlled experiment:
 Capture the full `select` object, `current`, and logs immediately BEFORE selecting a DRAW_COUNT value, then compare those pre-selection observations for episodes exposing different option ranges. This should identify what game-state quantity the numeric choices are representing before we assign semantics.
+
+
+## 2026-10-03 — E001-CABT-39: DRAW_COUNT Context Includes Opponent Mulligan Evidence
+
+A clean DRAW_COUNT context capture showed the following pre-selection facts:
+
+- `SelectType.COUNT = 8`
+- `SelectContext.DRAW_COUNT = 38`
+- options were `number = [0, 1, 2]`.
+- acting player was `yourIndex = 0`.
+- both players had `handCount = 6` and `deckCount = 47` before the selection.
+- the logs immediately before DRAW_COUNT contained a setup branch for player 1 with:
+  - `hasBasicPokemon = False`
+  - seven cards then moved from hand back to deck.
+  - a second hand was drawn.
+  - `hasBasicPokemon = True`.
+  - player 1 was then assigned an active Pokémon and six prize cards.
+
+Measured observation:
+- At least one mulligan-related `hasBasicPokemon = False` event occurred for player 1 immediately before a DRAW_COUNT selection presented to player 0.
+
+Hypothesis to test (not yet established):
+- The DRAW_COUNT numeric options may encode the number of mulligans/compensation cards associated with the opponent's setup branch.
+
+Why this remains unverified:
+- Prior E001-CABT-37 and E001-CABT-38 showed identical immediate hand/deck deltas after selecting numbers 0 and 1.
+- Therefore the numeric choice cannot currently be interpreted as a simple standalone draw amount from those transitions.
+
+Next controlled experiment:
+Across fresh episodes, count `hasBasicPokemon = False` setup events per opponent before DRAW_COUNT and compare that count with the maximum available `number` option. Do not select a DRAW_COUNT option.
