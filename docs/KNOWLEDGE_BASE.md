@@ -620,3 +620,29 @@ The future environment adapter should record, for every transition:
 - logs emitted by the transition.
 
 Decision: the simulator adapter is now the next engineering priority. Once this trace layer is implemented and tested, strategic policies can be plugged into the same environment without rewriting the execution logic.
+## 2026-10-03 — E001-CABT-21: Native Card Metadata Confirms Mega Signal Effect
+
+Experiment E001-CABT-21 queried CABT's native `all_card_data()` for Card ID 1145.
+
+Native result:
+- `cardId = 1145`
+- `name = Mega Signal`
+- `cardType = 1` (the native CardType enum identifies this as ITEM)
+- `skills = [Skill(name='Mega Signal', text='Search your deck for a Mega Evolution Pokémon {ex}, reveal it, and put it into your hand. Then, shuffle your deck.')]`
+- `attacks = []`
+
+Interpretation:
+The previous observed PLAY -> `CARD + TO_HAND` -> DECK-selection transition now has an exact native-card explanation: Card ID 1145 activates Mega Signal, which searches the deck for a Mega Evolution Pokémon ex, reveals it, puts it into the hand, and then shuffles the deck.
+
+This is stronger evidence than inferring the card effect solely from the observed state transition. The simulator's own card database is now the primary runtime semantic source for supported card metadata.
+
+Decision:
+Introduce a card-metadata cache sourced from CABT `all_card_data()` for simulator-facing execution/debugging. Keep the uploaded English card dataset as a separate canonical reference layer; do not silently merge or overwrite one source with the other.
+
+### Architecture consequence
+We now have three distinct semantic layers:
+1. CABT raw observation/action data.
+2. CABT native card metadata and effect definitions.
+3. External/reference card catalog used for analysis, feature engineering, and audit.
+
+Any disagreement between layer 2 and layer 3 should be logged as a data-quality discrepancy, not silently reconciled.
