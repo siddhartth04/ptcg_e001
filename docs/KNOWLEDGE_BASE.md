@@ -861,3 +861,26 @@ Not every CABT legal option exposes card identity fields. The semantic layer mus
 
 Next controlled integration target:
 Select one verified setup-active option and decode the resulting state, recording only the next live selection schema.
+
+
+## 2026-10-03 — E001-CABT-32: Repeated Setup-Active Selection Observed
+
+After selecting the first option from a live `CARD / SETUP_ACTIVE_POKEMON` selection, the native engine returned another live selection with the same schema:
+
+- `SelectType.CARD = 1`
+- `SelectContext.SETUP_ACTIVE_POKEMON = 1`
+- `minCount = 1`
+- `maxCount = 1`
+- exactly 1 legal option.
+- The option again exposed `playerIndex = 0` and no `card_id` or `serial`.
+
+Measured result:
+- The same selection type/context can occur consecutively.
+- A repeated selection schema must not be interpreted as a state-transition guarantee by the decoder.
+- The decoder correctly preserved the missing physical-card identity fields.
+
+Important limitation:
+This observation alone does not establish whether the repeated selection belongs to another setup participant, a remaining setup requirement, or another engine-level setup branch. That interpretation remains unverified.
+
+Next controlled integration target:
+Select the sole option and inspect the following native selection/log state, including `current` and `logs`, before assigning semantic meaning.
