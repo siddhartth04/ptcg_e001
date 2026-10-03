@@ -1405,3 +1405,21 @@ Important limitation:
 
 Next phase:
 Build a multi-episode live evaluation harness that records invalid actions, terminal results, step counts, and reproducible seeds/configuration before introducing strategic heuristics.
+
+
+## 2026-10-03 — E001-CABT-52: Evaluation Harness Unit Tests Passing
+
+A fresh repository checkout was tested after adding the native CABT evaluation harness.
+
+Measured result:
+- Full repository test suite: **20 passed**.
+- No test failures were observed.
+
+The added evaluation-layer tests validate:
+- episode records preserve raw terminal result codes and errors;
+- evaluation summaries keep completed/incomplete/invalid-action counts explicit.
+
+The native `cg` import is lazy inside episode execution so repository unit tests remain independent of the Kaggle-native runtime.
+
+Next controlled experiment:
+Run the evaluation harness against the native CABT engine for a fixed episode count using the current LegalFirst baseline. Record raw result codes, completion count, invalid-action count, and steps per episode without interpreting result-code semantics until verified.
