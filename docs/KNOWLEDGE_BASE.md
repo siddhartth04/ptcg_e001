@@ -1598,3 +1598,119 @@ This architecture is intentionally hybrid. It combines the strongest recurring i
 
 Important limitation:
 Winning the current Playground by an exceptional margin is an objective, not a guaranteed outcome. All strength claims must come from measured head-to-head evaluation or official leaderboard evidence.
+
+
+## 2026-10-03 — Research Council Literature Review: Competitive Agent Design
+
+A literature review was performed across imperfect-information game AI, self-play RL, search, imitation learning, opponent modeling, and complex card-game agents. The review is now incorporated into the project strategy.
+
+### Highest-priority research
+
+1. **Student of Games (Schmid et al., 2021/2023)** — combines guided search, self-play learning, and game-theoretic reasoning; uses GT-CFR and counterfactual value/policy networks for imperfect-information games. This is the strongest conceptual template for our eventual hybrid architecture. 
+   Source: arXiv 2112.03178 / Nature Communications 2023.
+
+2. **ReBeL (Brown et al., NeurIPS 2020)** — combines deep RL, self-play, and search in imperfect-information games and reasons over public belief states. It shows why search and learned value/policy estimation should be combined rather than treated as mutually exclusive. 
+   Source: arXiv 2007.13544 / NeurIPS 2020.
+
+3. **Deep CFR (Brown et al., ICML 2019)** — replaces hand-designed abstractions with neural approximations to counterfactual regret, relevant if later experiments show that equilibrium-oriented learning is useful for the CABT hidden-information structure.
+   Source: PMLR 97:793-802.
+
+4. **DeepStack (Moravčík et al., Science 2017 / arXiv 1701.01724)** — recursive reasoning, decomposition, and self-play-learned intuition for imperfect information. Particularly relevant to targeted search rather than exhaustive game-tree expansion.
+   Source: arXiv 1701.01724.
+
+5. **NFSP (Heinrich & Silver, 2016)** — combines fictitious self-play with deep RL and showed strong performance in imperfect-information poker. Relevant as a simpler game-theoretic self-play baseline before more complicated re-solving systems.
+   Source: arXiv 1603.01121.
+
+6. **DouZero (Zha et al., 2021)** — particularly relevant because DouDizhu is a large-action-space card game. It combines deep networks with Monte-Carlo methods, explicit action encoding, and parallel self-play, and achieved top performance in its benchmark. This strongly supports treating CABT's dynamic legal-action set as a first-class input rather than inventing a fixed global action vocabulary.
+   Source: arXiv 2106.06135.
+
+7. **DouZero+ (Zhao et al., 2022; later IEEE Transactions on Games)** — adds opponent modeling and coach-guided learning to DouZero and reported stronger performance than DouZero. This supports adding hidden-hand/opponent inference only after the base policy is stable.
+   Source: arXiv 2204.02558.
+
+8. **AlphaStar (Vinyals et al., Nature 2019)** — uses supervised learning from human replays, multi-agent RL, and a league of continually adapting strategies/counter-strategies. This is highly relevant to our eventual replay-pretrain -> self-play -> league architecture.
+   Source: Nature 575, 350-354.
+
+9. **MuZero (Schrittwieser et al., 2019)** — combines learned dynamics, policy/value prediction, and tree search. Relevant if the CABT engine becomes expensive to call and a learned latent model proves useful; not an immediate priority because we already possess a native simulator.
+   Source: arXiv 1911.08265.
+
+10. **Decision Transformer (Chen et al., 2021)** — reframes offline RL as sequence modeling. Relevant to replay-based sequence models, but should not replace simpler legal-action BC until a replay dataset and action-token representation are validated.
+    Source: OpenReview / ICML workshop 2021.
+
+11. **OpenSpiel (Lanctot et al., 2019)** — useful reference architecture and algorithm library for imperfect-information game research and evaluation. Its algorithm catalogue includes CFR variants, IS-MCTS, PIMC, MCTS, and related game-theoretic tooling.
+    Source: arXiv 1908.09453.
+
+12. **Self-Play Methods in Reinforcement Learning survey (2024)** — useful map of fictitious self-play, PSRO, population-based methods, CFR variants, and league-style training.
+    Source: arXiv 2408.01072.
+
+### Competition-specific evidence from the 2026 Pokémon TCG AI Challenge
+
+The completed Strategy writeups provide unusually direct evidence for this exact domain:
+
+- **6th-place**: self-play PPO, Bayesian hidden-hand estimation, per-matchup specialists, and delayed-effect credit handling.
+- **9th-place**: behavioral cloning -> value fine-tune -> PPO, plus bounded engine lookahead.
+- **14th-place**: behavioral cloning -> archetype experts -> deck specialists, plus a provable-lethal search override.
+- **17th-place**: a ~2.6M-parameter Transformer encoding the board and legal moves as sequence tokens, with a pointer head for action selection, followed by PPO/PFSP and a league of frozen checkpoints.
+- Another competitive writeup used **priority-gated heuristics + cheap shallow search**, demonstrating that a transparent rule/search hybrid can be competitive without a learned model.
+- A generalized approach generated searched games and used them as training data, suggesting a search -> data -> policy improvement flywheel.
+
+### Council synthesis
+
+The research does NOT justify jumping directly to a giant Transformer or end-to-end PPO.
+
+The evidence points toward a staged hybrid:
+
+`legal-action representation -> replay BC -> tactical search -> self-play value/policy improvement -> league/opponent modeling -> deck specialists`
+
+Reasoning:
+- CABT already supplies the legal action set, so the policy should score/select among legal options rather than predict arbitrary global action IDs.
+- Replays provide a cheap initialization distribution for BC.
+- Search can provide high-quality labels for tactical decisions and provable lethal situations.
+- Self-play can correct limitations of imitation and explore decisions not present in replay data.
+- Hidden-hand estimation/opponent models become useful once a stable base policy exists.
+- League/PFSP reduces overfitting to a single self-play opponent and supports matchup robustness.
+- Deck specialists should be introduced after a generalist baseline because the game is deck/matchup dependent.
+
+### Implementation priority derived from literature
+
+Priority 0 — evaluation integrity:
+- side-balanced evaluation
+- fixed seeds/configuration where the native engine permits
+- paired deck matrix
+- confidence intervals and regression gates.
+
+Priority 1 — replay ingestion and action-pointer BC:
+- convert replay observations into the same `GameState + LegalAction[]` format used online.
+- train a legal-action pointer policy.
+- keep action indices dynamic and episode-local.
+
+Priority 2 — tactical search:
+- only trigger search for high-impact decisions.
+- start with guaranteed lethal / immediate KO / forced survival cases.
+- use native engine transitions instead of inventing a surrogate simulator.
+
+Priority 3 — self-play value/policy improvement:
+- initialize from BC instead of random policy.
+- opponent pool includes frozen checkpoints and multiple deck archetypes.
+- evaluate against held-out opponents.
+
+Priority 4 — hidden-information/opponent model:
+- infer distributions over opponent deck/hand states from public history.
+- use belief features in policy/search rather than leaking hidden information.
+
+Priority 5 — specialist/league system:
+- archetype or deck specialists.
+- PFSP-style sampling weighted toward difficult matchups.
+- archive strong historical checkpoints.
+
+Priority 6 — learned model-based planning:
+- consider MuZero-style learned dynamics only if native-engine rollout cost becomes the bottleneck and empirical tests justify it.
+
+### Research safety rule
+
+No paper result is treated as evidence that the corresponding method will work on CABT. Every imported idea requires:
+1. a minimal implementation,
+2. a controlled ablation,
+3. a fixed evaluation protocol,
+4. a measured delta against the frozen control.
+
+The 2026 competition writeups are domain evidence; the academic papers are methodological evidence. They must not be conflated.
