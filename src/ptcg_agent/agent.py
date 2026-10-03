@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from .contract import ContractError, Selection, Decision, validate_decision
+from .contract import ContractError, validate_decision
+from .decision import DecisionInput
 from .policy import LegalFirstPolicy
 
 # Public cabt starter/default deck from the Kaggle environment source.
@@ -31,16 +32,18 @@ _POLICY = LegalFirstPolicy()
 def agent(obs: Mapping[str, Any]) -> list[int]:
     """Return a valid CABT action.
 
-    Phase 1: when ``select`` is None, CABT expects a 60-card deck.
-    Phase 2+: return indices into the currently supplied legal option list.
+    Phase 1: when select is None, CABT expects a 60-card deck.
+    Phase 2+: normalize the live observation into DecisionInput, let the
+    policy choose legal option indices, then validate against the CABT
+    cardinality/range contract.
     """
     if not isinstance(obs, Mapping):
         raise ContractError("observation must be a mapping")
 
-    selection = Selection.from_observation(obs)
-    if selection is None:
+    if obs.get("select") is None:
         return list(DEFAULT_DECK)
 
-    decision = _POLICY.choose(selection)
-    validate_decision(selection, decision)
+    decision_input = DecisionInput.from_observation(obs)
+    decision = _POLICY.choose(decision_input)
+    validate_decision(decision_input.to_selection(), decision)
     return decision.as_list()
