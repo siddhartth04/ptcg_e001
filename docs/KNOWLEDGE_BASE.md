@@ -1518,3 +1518,40 @@ Conclusion:
 
 Next controlled experiment:
 Run the planned 100-episode LegalFirst baseline using the freshly loaded evaluator and report actual player outcome counts, completion rate, invalid actions, and decision-step statistics.
+
+
+## 2026-10-03 — E001-CABT-57: 100-Episode LegalFirst Control Baseline
+
+The updated evaluator ran the current LegalFirst policy for 100 native CABT episodes.
+
+Measured:
+- Episodes: 100
+- Completed: 100
+- Incomplete: 0
+- Invalid actions: 0
+- Player 0 wins: 60
+- Player 1 wins: 40
+- Draws: 0
+- Total decision steps: 8,145
+- Mean decision steps/episode: 81.45
+- Median: 73
+- Minimum: 15
+- Maximum: 319
+
+Descriptive outcome frequencies for this exact 100-episode sample:
+- Player 0: 60/100 = 60%
+- Player 1: 40/100 = 40%
+- Draw: 0/100 = 0%
+
+Interpretation discipline:
+- This is the control-group result for the current LegalFirst policy, using the current deck and native CABT runtime in this exact evaluation procedure.
+- It is not a general estimate of agent strength and does not establish why the outcome split is 60/40.
+- No policy comparison exists yet, so no improvement claim can be made.
+- The 100-game sample is now the reference baseline for subsequent controlled policy experiments.
+
+Engineering conclusion:
+- Execution reliability is 100% in this sample: all 100 episodes completed with zero invalid actions.
+- Strategic quality is now quantitatively measurable and must be evaluated relative to this control.
+
+Next phase:
+Freeze this configuration as the E001 control and introduce exactly one strategic change at a time. The first candidate should be a deterministic, interpretable heuristic policy whose decisions can be audited from the normalized state and legal-action semantics.
