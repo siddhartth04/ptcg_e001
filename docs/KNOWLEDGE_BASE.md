@@ -1835,3 +1835,28 @@ Decision:
 - Treat `manifest.csv` as the lightweight discovery layer.
 - Inspect its schema and sample rows before downloading any larger daily replay dataset.
 - Do not assume column names or replay paths until the manifest itself is inspected.
+
+
+## 2026-10-03 — E001-CABT-63: Replay Manifest Schema Audited
+
+The downloaded Episodes Index manifest was parsed successfully.
+
+Measured:
+- 76 daily dataset rows.
+- Columns:
+  - `date`
+  - `daily_dataset_slug`
+  - `daily_dataset_url`
+  - `episode_count`
+  - `total_bytes`
+  - `top_avg_score`
+  - `median_avg_score`
+- The first listed dataset (2026-06-16) has 1,277 episodes and total_bytes 2,854,565,943.
+- Subsequent daily datasets are generally much larger (many around 21.47 GB) and contain several thousand episodes.
+- The manifest contains quality signals through `top_avg_score` and `median_avg_score`.
+
+Decision:
+- Do not download a multi-GB daily dataset blindly.
+- First rank the 76 manifest rows by `median_avg_score` and `top_avg_score`, then inspect the file listing of the strongest candidate day.
+- Prefer a day whose dataset exposes a manageable subset/partition structure or otherwise allows targeted extraction.
+- Replay selection will optimize for demonstrably strong agents while keeping acquisition and preprocessing bounded.
