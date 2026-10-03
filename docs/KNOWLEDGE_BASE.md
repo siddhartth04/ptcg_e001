@@ -77,35 +77,99 @@ This confirms that the observation is partially observable and that a future age
 ### Setup transitions confirmed
 Native CABT automatically handled opening hands, Basic Pokemon checks, setup card movement, and prize placement during the tested sequence.
 
-### Debugging correction: optional-selection assumption
-We previously saw a selection with `minCount = 0` and `maxCount = 1` and interpreted the next step as an optional bench-placement action.
+### Debugging correction: selection-state tracking
+The selection with `minCount = 0` and `maxCount = 1` was correctly identified as the setup-bench choice because the official enum later confirms `context = 2` is `SETUP_BENCH_POKEMON`.
 
-The next actual state had:
-- `type = 8`
-- `context = 38`
+Calling `battle_select([])` for that setup-bench state was valid and advanced the game.
+
+The **new** state after that action was:
+- `type = 8` = `COUNT`
+- `context = 38` = `DRAW_COUNT`
 - `minCount = 1`
 - `maxCount = 1`
-- three options.
+- options of the form `{'type': 0, 'number': 0/1/2}`
 
-We then called `battle_select([])`.
+We then mistakenly treated this new state as if it were still the previous optional bench selection and called `battle_select([])`.
 
-Observed result: Python raised `IndexError` because the native selection was invalid for the current `minCount = 1` contract.
+Observed result: Python raised `IndexError`.
+
+The error was therefore caused by our **state-transition tracking mistake**, not by an invalid optional-bench interpretation.
 
 Correct lesson:
-**Never infer that an action is optional from a previous state. Inspect the current `minCount` and `maxCount` immediately before acting.**
+**Every action must be selected from the current observation only. Never carry the previous selection's semantics into the next state.**
+
+### Official selection semantics now verified
+The supplied competition `cg/api.py` defines the numeric selection enums.
+
+Relevant `SelectType` values:
+- `MAIN = 0`: main-action choices such as play, attach, evolve, ability, discard, retreat, attack, and end.
+- `CARD = 1`
+- `ATTACHED_CARD = 2`
+- `CARD_OR_ATTACHED_CARD = 3`
+- `ENERGY = 4`
+- `SKILL = 5`
+- `ATTACK = 6`
+- `EVOLVE = 7`
+- `COUNT = 8`
+- `YES_NO = 9`
+- `SPECIAL_CONDITION = 10`
+
+Relevant `SelectContext` values verified from the source:
+- `SETUP_ACTIVE_POKEMON = 1`
+- `SETUP_BENCH_POKEMON = 2`
+- `SWITCH = 3`
+- `TO_ACTIVE = 4`
+- `TO_BENCH = 5`
+- `TO_FIELD = 6`
+- `TO_HAND = 7`
+- `DISCARD = 8`
+- `TO_DECK = 9`
+- `TO_DECK_BOTTOM = 10`
+- `TO_PRIZE = 11`
+- `DAMAGE_COUNTER = 13`
+- `DAMAGE_COUNTER_ANY = 14`
+- `DAMAGE = 15`
+- `REMOVE_DAMAGE_COUNTER = 16`
+- `HEAL = 17`
+- `EVOLVES_FROM = 18`
+- `EVOLVES_TO = 19`
+- `DEVOLVE = 20`
+- `ATTACH_FROM = 21`
+- `ATTACH_TO = 22`
+- `DETACH_FROM = 23`
+- `LOOK = 24`
+- `EFFECT_TARGET = 25`
+- `DISCARD_ENERGY_CARD = 26`
+- `DISCARD_TOOL_CARD = 27`
+- `SWITCH_ENERGY_CARD = 28`
+- `DISCARD_CARD_OR_ATTACHED_CARD = 29`
+- `DISCARD_ENERGY = 30`
+- `TO_HAND_ENERGY = 31`
+- `TO_DECK_ENERGY = 32`
+- `SWITCH_ENERGY = 33`
+- `SKILL_ORDER = 34`
+- `ATTACK = 35`
+- `DISABLE_ATTACK = 36`
+- `EVOLVE = 37`
+- `DRAW_COUNT = 38`
+- `DAMAGE_COUNTER_COUNT = 39`
+- `REMOVE_DAMAGE_COUNTER_COUNT = 40`
+- `IS_FIRST = 41`
+- `MULLIGAN = 42`
+- `ACTIVATE = 43`
+
+This establishes that the observed `type = 8, context = 38` state is a **draw-count selection**, not a bench-placement selection.
 
 ### Current unresolved questions
-1. Exact enum mapping for `SelectType`.
-2. Exact enum mapping for `SelectContext`.
-3. Semantics of each option object variant such as `type`, `area`, `index`, `playerIndex`, and `number`.
-4. Meaning of setup `type = 8`, `context = 38`.
-5. Why the high-level CABT wrapper previously returned `INVALID` while native initialization succeeds.
-6. Complete state-transition graph from setup through normal turns.
-7. Terminal-state and reward semantics.
-8. Search/lookahead interface and deterministic replay behavior.
+1. Complete `SelectContext` enum beyond the lines currently inspected.
+2. Exact semantics of each option object variant such as `type`, `area`, `index`, `playerIndex`, and `number`.
+3. Why the high-level CABT wrapper previously returned `INVALID` while native initialization succeeds.
+4. Complete state-transition graph from setup through normal turns.
+5. Terminal-state and reward semantics.
+6. Search/lookahead interface and deterministic replay behavior.
 
 ### Next controlled investigation
-Read the official competition `cg/api.py` definitions for `SelectType`, `SelectContext`, and the option dataclasses before making another state transition.
+Inspect the official `cg/api.py` option definitions and the remaining `SelectContext` values, then resume the state machine from the **draw-count** decision using the current `minCount/maxCount` and option semantics.
 
 Reason: the official package already exposes the intended schema, so using the source is safer than guessing numeric codes from observations.
 
@@ -118,8 +182,9 @@ Reason: the official package already exposes the intended schema, so using the s
 | E001-CABT-02 | Is the current deck rejected by native CABT? | `battle_start(deck, deck)` | Start succeeded | Disproved | Deck is not blocked at native initialization |
 | E001-CABT-03 | Does a legal first setup selection advance? | `battle_select([0])` | Succeeded | Verified | Legal indices drive native state transitions |
 | E001-CABT-04 | Does a second setup selection advance? | `battle_select([0])` | Succeeded | Verified | Continue state-machine characterization |
-| E001-CABT-05 | Was the later setup choice optional? | `battle_select([])` | Native error mapped to `IndexError` | Disproved | Respect current cardinality exactly |
-| E001-CABT-06 | Can numeric type/context semantics be safely inferred from one observation? | Not accepted as evidence | Unproven | Open | Read official enum definitions first |
+| E001-CABT-05 | Could the setup-bench selection be skipped? | `battle_select([])` while current state had `context=SETUP_BENCH_POKEMON, minCount=0, maxCount=1` | Succeeded; advanced to next state | Verified | Empty selection is valid when current minCount=0 |
+| E001-CABT-06 | What are `type=8` and `context=38`? | Read official `cg/api.py` | `COUNT` + `DRAW_COUNT` | Verified | Treat current state as draw-count selection |
+| E001-CABT-07 | Why did `battle_select([])` fail after setup? | Replayed state sequence and inspected current selection | Empty selection was sent to a state with `minCount=1` | Verified | The failure was our state-tracking error |
 
 ## Architecture direction
 
