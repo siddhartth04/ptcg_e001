@@ -1180,3 +1180,26 @@ Semantic status:
 
 Next controlled experiment:
 Use the same one-mulligan condition but select DRAW_COUNT `number = 0`, then inspect the immediate hand/deck delta and next selection. This gives a direct within-branch contrast against the `number = 2` result.
+
+
+## 2026-10-03 — E001-CABT-43: DRAW_COUNT Number 0 Causes No Draw and Ends Setup
+
+A controlled one-mulligan `DRAW_COUNT` state exposed options `[0, 1, 2]`. The probe selected raw `number = 0`.
+
+Measured transition:
+- Acting player's hand: `6 -> 6`, delta `0`.
+- Acting player's deck: `47 -> 47`, delta `0`.
+- Turn: `0 -> 1`.
+- Immediate next selection: `MAIN / MAIN`.
+
+Comparison with E001-CABT-41:
+- Number 2: hand `+2`, deck `-2`, turn remained `0`, followed by `SETUP_BENCH_POKEMON`.
+- Number 0: hand/deck unchanged, turn advanced to `1`, followed by `MAIN`.
+
+Measured conclusion:
+- `number = 0` means zero cards are drawn in this state.
+- The numeric choice also affects the subsequent setup flow: choosing 0 ended the setup stage immediately in this observation, while choosing 2 kept the engine in setup.
+- The raw evidence still does not by itself establish the complete game-rule semantics of why these choices are available.
+
+Next controlled experiment:
+Use a one-mulligan DRAW_COUNT state, select `number = 1), and inspect the immediate hand/deck delta plus the next selection. This completes the 0/1/2 behavioral comparison.
