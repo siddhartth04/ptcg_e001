@@ -1036,3 +1036,29 @@ Interpretation status:
 
 Next controlled experiment:
 Repeat on a genuine DRAW_COUNT branch, select `number = 1), and compare hand/deck changes against the number-0 baseline. This isolates whether the numeric choice changes the draw amount.
+
+
+## 2026-10-03 — E001-CABT-38: DRAW_COUNT Number 1 Matches Number 0 Immediate Delta
+
+A fresh native battle reached `COUNT / DRAW_COUNT` with options `[0, 1]`. The probe selected raw `number = 1`.
+
+Measured before/after state for the acting player:
+- Hand: `6 -> 7`, delta `+1`.
+- Deck: `47 -> 46`, delta `-1`.
+- Turn: `0 -> 1`.
+
+The resulting active player received Card ID 722, serial 7 in the active zone, and Card ID 722, serial 8 entered the hand. The opponent also transitioned into an active Pokémon and drew one card.
+
+Comparison against E001-CABT-37:
+- Number 0: hand delta `+1`, deck delta `-1`, turn `0 -> 1`.
+- Number 1: hand delta `+1`, deck delta `-1`, turn `0 -> 1`.
+
+Measured conclusion:
+- The immediate state delta after choosing DRAW_COUNT number 0 and number 1 is identical in these two observations.
+- Therefore the available evidence does NOT support interpreting the numeric field as a simple "number of cards drawn" value.
+
+Additional note:
+- The probe raised `SystemExit` deliberately after printing the result; the IPython warning is a notebook control-flow artifact, not a CABT engine failure.
+
+Next controlled experiment:
+Capture the full `select` object, `current`, and logs immediately BEFORE selecting a DRAW_COUNT value, then compare those pre-selection observations for episodes exposing different option ranges. This should identify what game-state quantity the numeric choices are representing before we assign semantics.
