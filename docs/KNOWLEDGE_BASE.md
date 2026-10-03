@@ -1423,3 +1423,33 @@ The native `cg` import is lazy inside episode execution so repository unit tests
 
 Next controlled experiment:
 Run the evaluation harness against the native CABT engine for a fixed episode count using the current LegalFirst baseline. Record raw result codes, completion count, invalid-action count, and steps per episode without interpreting result-code semantics until verified.
+
+
+## 2026-10-03 — E001-CABT-53: First 20-Episode Legal-First Baseline Measurement
+
+The native evaluation harness ran the current LegalFirst baseline for 20 complete episodes.
+
+Measured:
+- Episodes: 20
+- Completed: 20
+- Incomplete: 0
+- Invalid actions: 0
+- Raw result code distribution: `0: 10`, `1: 10`
+- Total decision steps: 1,877
+- Mean decision steps/episode: 93.85
+- Median decision steps/episode: 78 (from the sorted observations; this is a descriptive statistic only).
+
+Per-episode step counts:
+`[119, 129, 21, 45, 45, 63, 22, 99, 53, 276, 93, 148, 131, 32, 137, 41, 95, 257, 20, 51]`
+
+Methodological constraint:
+- The current harness records raw `current.result` codes but does not yet map code 0/1 to player outcomes.
+- Therefore this baseline is NOT reported as a win rate or loss rate.
+- The 10/10 result-code split is a raw engine measurement only.
+
+Engineering conclusion:
+- The LegalFirst policy is execution-safe across this 20-episode sample: 100% episode completion and 0 invalid actions.
+- The strategic value of LegalFirst remains unassessed.
+
+Next controlled experiment:
+Verify the semantic meaning of terminal result codes by printing the terminal `current.result` together with each player's terminal `win` field for fresh native episodes. After that, extend the evaluation record to capture the verified outcome semantics.
