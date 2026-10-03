@@ -1277,3 +1277,27 @@ Important scope note:
 
 Next controlled integration target:
 Advance only through the verified initial YES/NO selection and parse the resulting live `current` into `GameState`, comparing the normalized fields with the raw observation.
+
+
+## 2026-10-03 — E001-CABT-47: Live State Parsing After Initial YES
+
+After the initial `YES` selection, the native CABT observation was parsed successfully by `GameState.from_current()`.
+
+Raw live state:
+- `turn = 0`
+- `yourIndex = 1`
+- `firstPlayer = 0`
+- `round = 1`
+- both players had `handCount = 7`
+- both players had `deckCount = 53`
+- player 0 hand remained hidden
+- player 1 hand was visible with seven physical card instances
+- no active/bench cards or prize cards had yet been populated in this snapshot.
+
+Measured conclusion:
+- The normalized state layer correctly tracks the change from the battle-start sentinel `firstPlayer = -1` to the resolved `firstPlayer = 0`.
+- The acting/observable player can be player 1 even though player 0 is the first player; therefore `your_index` and `first_player` must remain separate state fields.
+- Hidden-information handling remains correct after setup begins.
+
+Next controlled integration target:
+Decode the live setup-active selection from this state and verify that the selected option index is kept separate from the normalized state representation.
