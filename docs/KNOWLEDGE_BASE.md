@@ -1880,3 +1880,21 @@ Decision:
 
 Next step:
 Query the Kaggle file listing for `kaggle/pokemon-tcg-ai-battle-episodes-2026-07-01` and inspect its partitions/file structure only.
+
+
+## 2026-10-03 — E001-CABT-65: July 1 Replay Dataset Is Individually Sharded
+
+The Kaggle file listing for the selected 2026-07-01 replay dataset is paginated and returned a page token plus individual JSON files.
+
+Observed on the first returned page:
+- Individual replay files are named like `82933529.json`, `82933532.json`, etc.
+- Each file is a standalone JSON object/file-sized shard; the first page included files ranging from roughly 0.5 MB to 5.8 MB.
+- The 2026-07-01 dataset overall is still reported by the index as approximately 21.47 GB.
+- The file listing is paginated, so the first page must not be treated as the complete file inventory.
+- No score metadata was exposed in the file-list response itself.
+
+Decision:
+- Do not download the full 21.47 GB archive.
+- Use one individual JSON shard as a schema probe.
+- Inspect its top-level structure, replay length, observation fields, action representation, and any embedded metadata before designing replay ingestion.
+- Do not assume the filename encodes score or quality.
