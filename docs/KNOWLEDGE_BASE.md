@@ -805,3 +805,31 @@ The existing 6 contract tests plus the new semantic action decoder coverage ther
 Decision:
 - Treat the semantic decoder as the current tested foundation for the next policy-layer integration.
 - Do not claim runtime-game correctness from unit tests alone; the decoder still needs integration validation against real CABT observations.
+
+
+## 2026-10-03 — E001-CABT-30: Live CABT Action Decoder Integration
+
+The semantic decoder was run against a real native CABT `select` object returned by `game.battle_start()`.
+
+Observed live selection:
+- `SelectType.YES_NO = 9`
+- `SelectContext.IS_FIRST = 41`
+- `minCount = 1`
+- `maxCount = 1`
+- 2 legal options.
+
+Decoded options:
+- option 0 -> `YES`
+- option 1 -> `NO`
+
+Measured result:
+- Raw engine observation was successfully accepted by `decode_legal_actions()`.
+- Both legal options were decoded with the verified semantic enum names.
+- Decoder returned exactly 2 actions, matching the engine's option count.
+- Native battle memory was released successfully.
+
+Conclusion:
+The decoder is now validated on both unit fixtures and one live native CABT observation. This establishes the first engine-integration checkpoint, but not yet broad coverage across selection types/contexts.
+
+Next controlled integration target:
+Advance the same native battle through the verified YES branch and decode the resulting setup selection without interpreting or altering its semantics.
