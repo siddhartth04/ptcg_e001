@@ -1453,3 +1453,27 @@ Engineering conclusion:
 
 Next controlled experiment:
 Verify the semantic meaning of terminal result codes by printing the terminal `current.result` together with each player's terminal `win` field for fresh native episodes. After that, extend the evaluation record to capture the verified outcome semantics.
+
+
+## 2026-10-03 — E001-CABT-54: Terminal Result Code Semantics Verified
+
+A 5-episode terminal probe showed that the per-player `win` field remained `0` even when `current.result` was terminal, so `players[i].win` is not sufficient to decode the terminal outcome from these observations.
+
+External CABT documentation confirms the `current.result` semantics:
+- `-1` = ongoing
+- `0` = player 0 wins
+- `1` = player 1 wins
+- `2` = draw. citeturn652078search0
+
+Measured experiment result from the 5 episodes:
+- result 1 occurred in Episodes 1, 2, 3, and 5.
+- result 0 occurred in Episode 4.
+- all `players[i].win` values printed as 0.
+
+Decision:
+- Use `current.result` as the authoritative terminal outcome field.
+- Do not infer winner from `players[i].win` in the evaluation harness.
+- The earlier 20-episode baseline can therefore be interpreted as 10 player-0 wins and 10 player-1 wins under the verified result-code mapping, but this remains a description of that specific 20-episode sample, not a general performance estimate.
+
+Next engineering step:
+Extend the evaluation record with an explicit `winner_index` derived only from the verified `current.result` code, and preserve the raw result code alongside it.
