@@ -335,3 +335,18 @@ E001-CABT-09 — Complete OptionType ontology: Read the official cg/api.py Optio
 
 ### Next controlled experiment
 Resume the exact setup sequence and, when the current selection is COUNT + DRAW_COUNT with NUMBER options, inspect the current options and choose one valid number. Do not hard-code the option index across runs because the legal option set may be state-dependent.
+## 2026-10-03 — Controlled Traversal Failure: Hard-Coded Setup Sequence
+
+Experiment E001-CABT-10 attempted to replay the setup phase using a fixed sequence of native selections: `[0]`, `[0]`, `[0]`, `[0]`, `[]`.
+
+Observed result: the sequence raised `IndexError` before the diagnostic print of the target draw-count state.
+
+Interpretation:
+- This proves the fixed sequence is not robust across fresh `battle_start()` instances.
+- We do **not** yet claim the exact cause from this run alone.
+- A plausible cause is randomized setup state, including opening-hand / mulligan branches, but this remains a hypothesis until observed directly.
+
+Decision:
+Do not hard-code the number or identity of setup transitions. Build the traversal around the **current observation's `select.context`, `select.type`, option schema, and cardinality** at every step.
+
+Next diagnostic: trace every setup selection before acting, explicitly recognize `IS_FIRST`, `MULLIGAN`, `SETUP_ACTIVE_POKEMON`, `SETUP_BENCH_POKEMON`, and stop when `DRAW_COUNT` is reached. Record the actual branch rather than assuming a fixed setup path.
