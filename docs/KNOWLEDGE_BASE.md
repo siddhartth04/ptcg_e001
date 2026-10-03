@@ -722,3 +722,30 @@ This is the first clean run where the observed follow-up is definitely tied to M
 The actual candidate card at `deck[34]` is visible in the returned deck array as Card ID 723. The native semantic predicate for that candidate has not yet been checked in this experiment.
 
 Decision: the next controlled step is to inspect `followup.deck[34]` and compare its native card metadata (`megaEx`, name, card type) without selecting it. This will directly test the Mega Signal legality invariant.
+## 2026-10-03 — E001-CABT-26: Mega Signal Candidate Invariant Verified
+
+Experiment E001-CABT-26 executed only after a legal PLAY action for the actual Card ID 1145 was verified.
+
+Observed target:
+- Mega Signal was found at `hand[5]` on Player 1's turn (`turn=2`).
+- MAIN option 4 was verified as `PLAY hand[5]` for Card ID 1145.
+
+Observed effect resolution:
+- Follow-up selection was `CARD + TO_HAND`.
+- `minCount=0`, `maxCount=1`.
+- Three legal CARD options were exposed.
+- The active effect was explicitly Card ID 1145 / Mega Signal.
+
+Candidate verification:
+- Option 0 referenced `deck[18]` -> Card ID 723 -> Mega Abomasnow ex -> `megaEx=True`.
+- Option 1 referenced `deck[29]` -> Card ID 723 -> Mega Abomasnow ex -> `megaEx=True`.
+- Option 2 referenced `deck[36]` -> Card ID 723 -> Mega Abomasnow ex -> `megaEx=True`.
+
+Result:
+All three legal Mega Signal candidates observed in this episode satisfied the native `megaEx=True` predicate. This verifies the intended candidate-filter invariant for this episode.
+
+Important scope limitation:
+This is an episode-level invariant, not yet a proof across all decks/states/cards. We need additional controlled samples before turning it into a global simulator invariant.
+
+Decision:
+Add a semantic constraint to the card-effect layer: when the active effect is Mega Signal, candidate actions should be represented as selecting a deck card whose native metadata satisfies `megaEx=True`. The final legal-option set from CABT remains authoritative.
