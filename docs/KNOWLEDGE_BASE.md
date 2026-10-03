@@ -1555,3 +1555,46 @@ Engineering conclusion:
 
 Next phase:
 Freeze this configuration as the E001 control and introduce exactly one strategic change at a time. The first candidate should be a deterministic, interpretable heuristic policy whose decisions can be audited from the normalized state and legal-action semantics.
+
+
+## 2026-10-03 — Council Strategic Reassessment: Move From Infrastructure to Competitive Agent
+
+External competition review was performed against the current 2026 Playground and the completed 2026 Featured Simulation.
+
+Current Playground facts:
+- The Playground started 2026-09-29.
+- Entry deadline is 2027-01-01.
+- Final submission deadline is 2027-01-08.
+- Post-deadline evaluation is scheduled through approximately 2027-01-22.
+- The Playground uses an estimated skill rating with uncertainty, starts submissions at mu0=600, and uses similar-rating matchmaking; the final leaderboard is based on a post-deadline Bradley-Terry tournament. citeturn522474search1
+- The latest indexed Playground overview reports 255 entrants, 60 participants, 56 teams, and 98 submissions. citeturn522474search1
+
+Leaderboard visibility:
+- The current Playground leaderboard is dynamically rendered and its exact current top rating was not available in the indexed public search result. Do not invent a current top score.
+- The completed Featured Simulation provides a useful historical ceiling reference: final leaderboard leader Luca reached 1398.2, followed by palsystem 1297.8, Unown Gradiant 1280.5, flg 1266.1, and Petit Canard 1257.3. These scores are from the prior Featured Simulation, not the current Playground. citeturn829807search0
+
+External-method evidence from the completed competition:
+- A 14th-place system combined behavioral cloning, archetype experts, deck specialists, and a guaranteed-lethal search override. citeturn522474search6
+- A 6th-place system used self-play RL, Bayesian hidden-hand estimation, and per-matchup policy switching. citeturn204670search4
+- A 15th-place system used a 7.5M-parameter recurrent actor-critic with population self-play. citeturn829807search3
+- A 20th-place system used action-dynamics contrastive pretraining followed by PPO specialists and deck mutation. citeturn829807search4
+- A rule-based system with lightweight search reached 92nd place / top 1.4% with no learned model, demonstrating that disciplined heuristics plus search can be competitive when validated carefully. citeturn829807search9
+- Public daily replay datasets from the prior simulation contain completed episode JSON replays and manifests, and are explicitly available as public Kaggle datasets. citeturn522474search0
+
+Council decision:
+1. Do NOT immediately replace LegalFirst with ad-hoc card heuristics.
+2. First harden evaluation against side/order confounding. The 100-game LegalFirst control produced a 60/40 Player-0/Player-1 split with identical decks; this is a control observation, not evidence that Player 0 is intrinsically stronger.
+3. Build paired/side-balanced local evaluation and record confidence intervals before judging strategic changes.
+4. Then build a replay-driven behavioral-cloning baseline using public high-rated episode data, with legal-action pointer prediction rather than a fixed global action vocabulary.
+5. Add an auditable deterministic search layer for provable lethal / immediate tactical opportunities.
+6. Follow with self-play/PPO or another value-improvement stage only after the BC policy is strong enough to provide a useful prior.
+7. Add opponent archetype/deck inference and specialist routing only after the general pipeline has measurable gains.
+8. Preserve a frozen control agent and never replace the best measured policy without an A/B gate.
+
+Target architecture:
+raw CABT -> normalized state + legal actions -> learned policy prior -> tactical search/override -> validated option indices.
+
+This architecture is intentionally hybrid. It combines the strongest recurring ideas observed in public high-performing solutions while preserving the project's verified state/action foundation.
+
+Important limitation:
+Winning the current Playground by an exceptional margin is an objective, not a guaranteed outcome. All strength claims must come from measured head-to-head evaluation or official leaderboard evidence.
