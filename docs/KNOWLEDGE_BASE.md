@@ -749,3 +749,19 @@ This is an episode-level invariant, not yet a proof across all decks/states/card
 
 Decision:
 Add a semantic constraint to the card-effect layer: when the active effect is Mega Signal, candidate actions should be represented as selecting a deck card whose native metadata satisfies `megaEx=True`. The final legal-option set from CABT remains authoritative.
+## 2026-10-03 — E001-CABT-27: Card Identity Probe Incomplete
+
+Experiment E001-CABT-27 verified native metadata for Card ID 723:
+- `cardId = 723`
+- `name = Mega Abomasnow ex`
+- `cardType = 0`
+- `stage1 = True`
+- `megaEx = True`
+
+However, the experiment did **not** actually inspect multiple physical instances or their serial numbers. The final printed message only described the intended check; no serial-level evidence was collected.
+
+Decision:
+Do not claim that Card ID 723 instances have distinct serials based on E001-CABT-27. The question remains open and requires an observation containing multiple physical card instances with both `id` and `serial` visible.
+
+### Research discipline
+A test description or print statement is not a result. Only emitted observations count as evidence.
