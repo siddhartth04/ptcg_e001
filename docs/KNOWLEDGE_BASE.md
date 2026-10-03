@@ -428,3 +428,27 @@ Decision: the setup-to-normal-turn transition is now reliably traversed using cu
 
 ### Research discipline note
 Do not encode the hypothesized mulligan/draw relationship into the agent yet. First collect multiple controlled episodes and correlate `MULLIGAN`, `DRAW_COUNT`, logs, and resulting hand/deck changes.
+## 2026-10-03 — Verified END Turn Handoff
+
+Experiment E001-CABT-14 reached a normal MAIN action state and selected the explicit END option.
+
+Observed result:
+- The starting player selected END from the MAIN menu.
+- After END, `turn=2`, `yourIndex=1`, `firstPlayer=0`, `result=-1`.
+- The next selection was another `MAIN` menu for Player 1.
+- Recent logs included Player 0 `TURN_START`, Player 0 draw-reverse / turn-end events, then Player 1 `TURN_START` and a draw event.
+
+The source API defines `TURN_START` and `TURN_END` as log events and `DRAW_REVERSE` / `DRAW` as draw events, supporting the interpretation that END caused the turn to hand off to the second player and that the second player's turn began with a draw. This source-backed log interpretation is recorded separately from the directly observed state values.
+
+Decision: the normal turn-cycle transition is now verified enough to begin building a reusable environment driver. The driver should preserve the raw observation, decoded selection, chosen option, next observation, and logs at every transition.
+
+### Architecture consequence
+We now have enough evidence to introduce a semantic action decoder with a structure such as:
+
+`Selection(type, context, minCount, maxCount, options) -> LegalAction[]`
+
+and an executor:
+
+`LegalAction -> option index -> cg.battle_select([index])`
+
+Search, policy learning, and strategic scoring should operate on `LegalAction` representations rather than raw integer indices.
