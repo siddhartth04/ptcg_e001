@@ -913,3 +913,30 @@ Measured result:
 
 Next controlled integration target:
 Inspect the three raw NUMBER options and record their `number` values without selecting one yet.
+
+
+## 2026-10-03 — E001-CABT-34: Setup-Bench Branch Prevented Clean DRAW_COUNT Capture
+
+A controlled traversal intended to stop at `SelectType.COUNT / SelectContext.DRAW_COUNT` did not reach that state.
+
+Observed path:
+- Step 0: `YES_NO / IS_FIRST`
+- Step 1: `CARD / SETUP_ACTIVE_POKEMON`
+- Step 2: `CARD / SETUP_ACTIVE_POKEMON`
+- Step 3: `CARD / SETUP_BENCH_POKEMON`
+- Step 4: `CARD / SETUP_BENCH_POKEMON`
+- Step 5: `MAIN / MAIN`
+
+At both setup-bench states, the traversal selected option `[0]` rather than taking the optional zero-selection branch when permitted.
+
+Measured result:
+- The expected DRAW_COUNT state was not reached.
+- The resulting MAIN selection contained 5 legal options: PLAY, ATTACH, PLAY, ATTACH, END.
+- This run provides evidence that setup traversal is branch-sensitive, but does not by itself establish the exact causal rule because the episode also depends on engine state/randomization.
+
+Correction:
+- The intended DRAW_COUNT probe must preserve the verified optional-bench no-op path by selecting `[]` whenever `SETUP_BENCH_POKEMON` has `minCount = 0`.
+- No DRAW_COUNT numeric semantics should be inferred from this run.
+
+Next controlled integration target:
+Repeat the traversal while taking the zero-selection branch at optional setup-bench prompts and stop immediately when DRAW_COUNT appears.
