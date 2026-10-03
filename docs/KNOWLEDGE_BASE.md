@@ -833,3 +833,31 @@ The decoder is now validated on both unit fixtures and one live native CABT obse
 
 Next controlled integration target:
 Advance the same native battle through the verified YES branch and decode the resulting setup selection without interpreting or altering its semantics.
+
+
+## 2026-10-03 — E001-CABT-31: Live Setup-Active Decoder Integration
+
+A real native CABT battle was advanced through the verified initial `YES` selection and the resulting setup-active selection was decoded.
+
+Observed live selection:
+- `SelectType.CARD = 1`
+- `SelectContext.SETUP_ACTIVE_POKEMON = 1`
+- `minCount = 1`
+- `maxCount = 1`
+- 2 legal options.
+
+Decoded options:
+- option 0 -> `CARD`
+- option 1 -> `CARD`
+
+Both options exposed `playerIndex = 0`, while `card_id` and `serial` were absent/decoded as `None`.
+
+Measured result:
+- The decoder successfully handled a second live selection type/context.
+- It preserved the absence of physical-card identity instead of inventing card IDs or serials.
+
+Conclusion:
+Not every CABT legal option exposes card identity fields. The semantic layer must treat `card_id`, `serial`, and `player_index` as optional metadata, while retaining the raw option as authoritative.
+
+Next controlled integration target:
+Select one verified setup-active option and decode the resulting state, recording only the next live selection schema.
