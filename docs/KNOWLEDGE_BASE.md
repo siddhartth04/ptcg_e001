@@ -1120,3 +1120,33 @@ Still unverified:
 
 Next controlled experiment:
 Find a DRAW_COUNT state with exactly one recorded opponent mulligan (options 0,1,2), select the maximum value 2, and measure the complete immediate state/log delta. Compare it with the same branch selecting 0.
+
+
+## 2026-10-03 — E001-CABT-41: DRAW_COUNT Number 2 Directly Changes Hand by +2
+
+A controlled one-mulligan DRAW_COUNT episode exposed options `[0,1,2]`. The probe selected raw `number = 2`.
+
+Pre-selection:
+- acting player hand count = 6
+- acting player deck count = 47
+- turn = 0
+- opponent had exactly 1 `hasBasicPokemon = False` event.
+
+Immediately after selection:
+- acting player hand count = 8, delta `+2`
+- acting player deck count = 45, delta `-2`
+- opponent hand count remained 6
+- opponent deck count remained 47
+- turn remained 0
+
+Measured conclusion:
+- In this controlled state, selecting DRAW_COUNT number 2 caused exactly two cards to move from the acting player's deck into the acting player's hand.
+- This is direct evidence that the NUMBER payload controls a card-draw quantity in this state.
+- Unlike E001-CABT-37/38, this observation did not advance the turn immediately.
+
+Important remaining ambiguity:
+- The relationship between DRAW_COUNT, the opponent's mulligan count, and the subsequent turn-start draw has not yet been fully modeled.
+- We should inspect the next `select`, `current`, and logs after selecting number 2 before finalizing the semantic label.
+
+Next controlled experiment:
+Repeat the one-mulligan case, select number 2, and print the complete post-selection `select`, `current`, and newly emitted logs. Do not make a further selection.
