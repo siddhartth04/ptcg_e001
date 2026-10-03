@@ -452,3 +452,23 @@ and an executor:
 `LegalAction -> option index -> cg.battle_select([index])`
 
 Search, policy learning, and strategic scoring should operate on `LegalAction` representations rather than raw integer indices.
+## 2026-10-03 — E001-CABT-15: Decoder Namespace Error
+
+Experiment E001-CABT-15 attempted to inspect the semantic MAIN action menu using the official enum classes.
+
+Observed result:
+- Setup traversal itself succeeded through `IS_FIRST`, two `SETUP_ACTIVE_POKEMON` decisions, and optional `SETUP_BENCH_POKEMON`.
+- The inspection code then raised `AttributeError: type object 'OptionType' has no attribute 'MAIN'`.
+
+Root cause:
+- `MAIN` is a member of `SelectType`, not `OptionType`.
+- `SelectType.MAIN = 0` identifies the selection mode/context.
+- `OptionType` contains the candidate action types such as `PLAY`, `ATTACH`, and `END`.
+
+Decision:
+Keep these namespaces strictly separated in the decoder:
+`selection.type -> SelectType`; `selection.context -> SelectContext`; `selection.option[i].type -> OptionType`.
+
+This was a code-level namespace mistake in our probe, not an engine failure and not a simulator finding.
+
+Next step: rerun the same semantic-main probe with `SelectType.MAIN` for the selection type and `OptionType.*` only for option types.
