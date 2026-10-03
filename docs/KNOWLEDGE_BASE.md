@@ -293,3 +293,45 @@ E001-CABT-08 — Option schema: Read official cg/api.py OptionType, Option, and 
 ### Next controlled investigation
 
 Inspect the remainder of the official OptionType enum before taking another native action. Then resume from the real draw-count state and select a valid NUMBER option according to the current observation.
+
+## 2026-10-03 — Complete OptionType Action Ontology Verified
+
+The supplied competition cg/api.py now gives the complete OptionType mapping currently present in the file:
+
+- NUMBER = 0: choose a count.
+- YES = 1: choose Yes.
+- NO = 2: choose No.
+- CARD = 3: choose a card.
+- TOOL_CARD = 4: choose an attached Pokémon Tool.
+- ENERGY_CARD = 5: choose an attached Energy card.
+- ENERGY = 6: choose Energy; the option can include a count of energy units.
+- PLAY = 7: play a card from the hand.
+- ATTACH = 8: attach a card to a Pokémon.
+- EVOLVE = 9: choose an Evolution.
+- ABILITY = 10: use an Ability.
+- DISCARD = 11: discard a card in play.
+- RETREAT = 12: retreat the Active Pokémon.
+- ATTACK = 13: choose an Attack by attackId.
+- END = 14: end the turn.
+- SKILL = 15: select the order of card skills; cardId 0 indicates special-condition handling according to the source comments.
+- SPECIAL_CONDITION = 16: select a Special Condition.
+
+The same source also defines LogType values used for event interpretation, including SHUFFLE=0, HAS_BASIC_POKEMON=1, TURN_START=2, TURN_END=3, DRAW=4, DRAW_REVERSE=5, MOVE_CARD=6, MOVE_CARD_REVERSE=7, SWITCH=8, and CHANGE=9.
+
+### Strategic implication
+The action space is not a flat global integer action vocabulary. CABT exposes a dynamic legal-action set whose option objects encode the semantics of the currently available actions. This supports a variable-length legal-action policy head and action-conditioned scoring architecture.
+
+### Experiment ledger addition
+E001-CABT-09 — Complete OptionType ontology: Read the official cg/api.py OptionType and related LogType definitions. Result: action types 0-16 are source-verified for this competition package. Decision: build the agent around dynamic legal options plus semantic action decoding rather than a guessed fixed action table.
+
+### Current unresolved questions
+1. Exact AreaType meanings and all option fields for each action type.
+2. How MAIN selection options encode PLAY, ATTACH, EVOLVE, ABILITY, DISCARD, RETREAT, ATTACK, and END.
+3. Complete deck/card legality rules exposed by the simulator.
+4. Why the high-level kaggle_environments wrapper previously returned INVALID while native initialization succeeds.
+5. Complete state-transition graph from setup into normal turns.
+6. Terminal-state and reward semantics.
+7. Search/lookahead and deterministic replay behavior.
+
+### Next controlled experiment
+Resume the exact setup sequence and, when the current selection is COUNT + DRAW_COUNT with NUMBER options, inspect the current options and choose one valid number. Do not hard-code the option index across runs because the legal option set may be state-dependent.
