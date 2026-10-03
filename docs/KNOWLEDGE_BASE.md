@@ -1938,3 +1938,21 @@ Research implication:
 
 Next controlled step:
 Inspect the first several `steps` entries and print only step number, status, reward, action, observation keys, select metadata, and current-player index. Do not print full hidden deck/card objects again.
+
+
+## 2026-10-03 — E001-CABT-67: Replay `steps` Are Nested Per-Agent Records
+
+The first compact replay-step inspection attempted to treat each element of `replay["steps"]` as a dictionary. The probe failed with:
+
+`AttributeError: 'list' object has no attribute 'get'`
+
+Measured fact:
+- `replay["steps"]` has length 206.
+- Each element at this level is a list, not a single step dictionary.
+
+Correction:
+- Replay parsing must first inspect the nested list structure and determine its per-agent ordering/meaning before extracting `action`, `observation`, `reward`, or `status`.
+- No temporal alignment assumption should be made until this nesting is directly inspected.
+
+Methodological rule:
+- Treat the failed probe as a schema-discovery result, not an error to work around by guessing the structure.
