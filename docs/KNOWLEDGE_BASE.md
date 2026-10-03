@@ -1791,3 +1791,31 @@ Methodological implication:
 
 Next controlled experiment:
 Run a side-balanced LegalFirst evaluation with equal numbers of `reverse_player=False` and `reverse_player=True` episodes. Report first-player/second-player outcomes separately for each condition and pooled across both conditions.
+
+
+## 2026-10-03 — E001-CABT-61: Side-Balanced LegalFirst Control
+
+A 200-episode `reverse_player=True` control was run with the same LegalFirst policy and identical decks.
+
+Measured:
+- First-player wins: 114/200 = 57.0%
+- Second-player wins: 86/200 = 43.0%
+
+Combining with the valid `reverse_player=False` control from E001-CABT-59:
+- reverse_player=False: first-player 117/200 = 58.5%, second-player 83/200 = 41.5%
+- reverse_player=True: first-player 114/200 = 57.0%, second-player 86/200 = 43.0%
+- pooled across 400 episodes: first-player 231/400 = 57.75%, second-player 169/400 = 42.25%
+
+Measured conclusion:
+- The first-player outcome imbalance is reproduced across both native first-player assignments under the same policy/deck configuration.
+- The side assignment itself does not appear to explain the observed first-player advantage in these two samples; the effect persists when `reverse_player` is flipped.
+- The 57.75% pooled value is a descriptive result for this exact LegalFirst control and evaluation protocol, not a universal game-level first-player advantage estimate.
+
+Evaluation decision:
+- Freeze this 400-episode side-balanced control as the current baseline reference.
+- Future strategic policies must be evaluated under the same paired `reverse_player=False/True` protocol.
+- Report both pooled outcome frequency and stratified first-player/second-player results.
+- Do not compare a new policy against the old 60/40 Player-0/Player-1 split without side normalization.
+
+Next strategic phase:
+Move to replay-data acquisition and audit. The target representation is the same online `GameState + LegalAction[]` interface, so replay observations should be converted into the identical decision format before training any behavioral-cloning model.
