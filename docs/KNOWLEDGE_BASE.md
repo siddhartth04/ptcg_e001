@@ -494,3 +494,36 @@ Important boundary:
 
 Decision:
 The next implementation layer should formalize a typed `LegalAction` representation while preserving the raw option object for execution. Area mappings must be verified before hard-coded semantic labels are introduced.
+## 2026-10-03 — E001-CABT-17: AreaType Mapping Verified
+
+The official competition `cg/api.py` defines the relevant card/field locations:
+
+- `DECK = 1`
+- `HAND = 2`
+- `DISCARD = 3`
+- `ACTIVE = 4`
+- `BENCH = 5`
+- `PRIZE = 6`
+- `STADIUM = 7`
+- `ENERGY = 8`
+- `TOOL = 9`
+- `PRE_EVOLUTION = 10`
+- `PLAYER = 11`
+- `LOOKING = 12`
+
+This confirms the runtime semantic-main observation from E001-CABT-16:
+- `area=2` means HAND.
+- `inPlayArea=4` means ACTIVE.
+
+Therefore an observed option such as `{'type': 8, 'area': 2, 'index': 0, 'inPlayArea': 4, 'inPlayIndex': 0}` can now be decoded as an `ATTACH` action from hand index 0 to the Active Pokémon at index 0.
+
+Decision: the semantic decoder can now use official names for these AreaType values instead of leaving them as anonymous numeric areas.
+
+### Architecture checkpoint
+We now have source-verified mappings for:
+- selection mode (`SelectType`)
+- selection context (`SelectContext`)
+- candidate action/object type (`OptionType`)
+- card/field location (`AreaType`).
+
+This is sufficient to begin implementing the reusable `LegalAction` abstraction while keeping raw CABT dictionaries preserved for exact execution/debugging.
