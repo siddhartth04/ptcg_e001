@@ -685,3 +685,19 @@ Card-specific experiments must resolve `option.index` against the current acting
 E001-CABT-22 remains invalid as a Mega Signal test; E001-CABT-23 is the first clean identity-bound Mega Signal setup.
 
 Next controlled experiment: execute exactly the verified Mega Signal PLAY option and inspect its follow-up selection and candidate card identities without selecting a candidate.
+## 2026-10-03 — E001-CABT-24: Target-Locator Traversal Bug
+
+Experiment E001-CABT-24 attempted to execute Card ID 1145 (Mega Signal) after locating a legal PLAY action.
+
+Observed result: the code reached a MAIN state but raised `RuntimeError: Unexpected state while locating Mega Signal` instead of continuing.
+
+Root cause:
+- The locator only knew how to process setup contexts.
+- Once the battle entered a normal MAIN state where Mega Signal was not currently playable/located, it treated MAIN as an error instead of a valid state requiring a deliberate control action.
+
+This is a driver bug, not evidence about Mega Signal or CABT.
+
+Decision:
+Card-specific search drivers must handle MAIN states explicitly. If the target action is not currently exposed, the driver should either continue via a controlled legal MAIN action (for example END) or report that the target is unavailable in the current state. It must never classify a valid MAIN observation as an unexpected setup state.
+
+Next controlled experiment: build a target-aware traversal that handles setup states, recognizes MAIN, resolves PLAY options against the actual hand, executes only Card ID 1145 when exposed, and otherwise ends the turn to continue the search.
