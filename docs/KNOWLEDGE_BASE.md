@@ -1301,3 +1301,32 @@ Measured conclusion:
 
 Next controlled integration target:
 Decode the live setup-active selection from this state and verify that the selected option index is kept separate from the normalized state representation.
+
+
+## 2026-10-03 — E001-CABT-48: Live State + LegalAction Integration
+
+A live native CABT observation was simultaneously normalized into `GameState` and decoded into semantic `LegalAction` objects.
+
+Observed state:
+- `turn = 0`
+- `your_index = 1`
+- `first_player = 0`
+
+Observed legal actions:
+- option 0 -> `CARD / SETUP_ACTIVE_POKEMON -> CARD`
+- option 1 -> `CARD / SETUP_ACTIVE_POKEMON -> CARD`
+
+Execution invariant:
+- the decoded action indices were exactly `[0, 1]`, matching the native option list positions.
+
+Measured conclusion:
+- The state abstraction and legal-action abstraction can coexist on the same live CABT observation without changing the engine-facing option index.
+- This establishes the first combined state/action integration checkpoint.
+
+Architecture decision:
+- A policy should consume `GameState` plus decoded `LegalAction[]`.
+- The final execution layer should return only the selected `option_index` values required by CABT.
+- No global action-ID remapping should be introduced.
+
+Next step:
+Implement a thin decision-input object that bundles normalized `GameState` and `LegalAction[]`, then unit-test that bundle before connecting any strategic policy.
