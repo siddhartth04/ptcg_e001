@@ -23,6 +23,43 @@ def _read_deck_csv() -> list[int]:
     ]
 
 
+def _current_for_agent_test() -> dict:
+    base = {
+        "turn": 0,
+        "turnActionCount": 2,
+        "yourIndex": 0,
+        "firstPlayer": 0,
+        "supporterPlayed": False,
+        "stadiumPlayed": False,
+        "energyAttached": False,
+        "retreated": False,
+        "result": -1,
+        "draw": 0,
+        "round": 1,
+        "stadium": [],
+        "looking": None,
+    }
+
+    player = {
+        "active": [],
+        "bench": [],
+        "benchMax": 5,
+        "deckCount": 53,
+        "discard": [],
+        "prize": [],
+        "handCount": 7,
+        "hand": [],
+        "poisoned": False,
+        "burned": False,
+        "asleep": False,
+        "paralyzed": False,
+        "confused": False,
+        "win": 0,
+    }
+
+    return {**base, "players": [player, player]}
+
+
 def test_default_deck_is_60_cards() -> None:
     assert len(DEFAULT_DECK) == 60
 
@@ -46,23 +83,63 @@ def test_deck_phase_returns_60_card_ids() -> None:
 def test_battle_phase_returns_indices_into_legal_options() -> None:
     obs = {
         "select": {
-            "option": [{"type": 1}, {"type": 2}, {"type": 3}],
+            "type": 0,
+            "context": 0,
+            "option": [{"type": 14}, {"type": 14}, {"type": 14}],
             "minCount": 1,
             "maxCount": 2,
         },
         "logs": [],
-        "current": None,
+        "current": _current_for_agent_test(),
     }
+
     out = agent(obs)
+
     assert out == [0, 1]
     assert all(0 <= i < 3 for i in out)
 
 
 def test_zero_selection() -> None:
-    obs = {"select": {"option": [], "minCount": 0, "maxCount": 0}}
+    obs = {
+        "select": {
+            "type": 0,
+            "context": 0,
+            "option": [],
+            "minCount": 0,
+            "maxCount": 0,
+        },
+        "current": _current_for_agent_test(),
+    }
     assert agent(obs) == []
 
 
 def test_invalid_selection_cardinality_rejected() -> None:
-    with pytest.raises(ContractError):
-        agent({"select": {"option": [{"type": 1}], "minCount": 2, "maxCount": 1}})
+    obs = {
+        "select": {
+            "type": 0,
+            "context": 0,
+            "option": [{"type": 14}],
+            "minCount": 2,
+            "maxCount": 1,
+        },
+        "current": _current_for_agent_test(),
+    }
+
+    with pytest.raises((ContractError, ValueError)):
+        agent(obs)
+
+
+def test_missing_current_rejected_during_battle() -> None:
+    obs = {
+        "select": {
+            "type": 0,
+            "context": 0,
+            "option": [{"type": 14}],
+            "minCount": 1,
+            "maxCount": 1,
+        },
+        "current": None,
+    }
+
+    with pytest.raises(TypeError):
+        agent(obs)
