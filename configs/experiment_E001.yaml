@@ -1,0 +1,18 @@
+experiment_id: E001
+title: CABT legality-first baseline
+status: implementation-complete_experiment-pending
+seed: 2026
+policy: LegalFirstPolicy
+deck: default_cabt_deck
+training: none
+metrics:
+  - win_rate
+  - completion_rate
+  - invalid_action_rate
+  - draw_rate
+  - mean_game_length
+  - p95_game_length
+  - inference_latency_ms
+notes:
+  - This experiment is a control baseline, not the final strategic agent.
+  - Native CABT execution is required before recording results.
