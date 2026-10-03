@@ -1371,3 +1371,37 @@ Validated canonical path:
 
 Architecture milestone:
 The repository now has a single canonical observation -> state/action abstraction -> policy -> validated option-index path. Strategic policy changes can therefore be isolated from simulator parsing and contract logic.
+
+
+## 2026-10-03 — E001-CABT-51: Production Agent Live End-to-End Smoke Test
+
+The fresh repository's production `agent()` was connected directly to the native CABT engine and executed for 20 consecutive decision steps.
+
+Measured result:
+- 20 decision steps executed.
+- Every returned selection was accepted by the native engine.
+- No invalid-selection error occurred.
+- The production agent consistently returned option indices that were present in the live legal-action set.
+- The battle remained unresolved after the 20-step smoke horizon: `result = -1`.
+
+Observed state families during the run included:
+- `YES_NO / IS_FIRST`
+- `CARD / SETUP_ACTIVE_POKEMON`
+- `COUNT / DRAW_COUNT`
+- `MAIN / MAIN`
+- `CARD / TO_HAND`
+- `CARD / DISCARD`
+- `CARD / SWITCH`
+
+Measured conclusion:
+- The canonical production path from raw CABT observation through `DecisionInput`, `LegalFirstPolicy`, contract validation, and back to native CABT execution is operational for at least 20 consecutive live decisions in this episode.
+- This validates the infrastructure path, not strategic quality or game-winning ability.
+- `result = -1` means no terminal result had been reached within the 20-step horizon.
+
+Important limitation:
+- This is a single live episode/smoke test.
+- It is not a robustness benchmark and provides no win-rate or competitive-performance estimate.
+- The LegalFirst policy is intentionally non-strategic and should not yet be evaluated as a competitive policy.
+
+Next phase:
+Build a multi-episode live evaluation harness that records invalid actions, terminal results, step counts, and reproducible seeds/configuration before introducing strategic heuristics.
