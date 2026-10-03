@@ -884,3 +884,32 @@ This observation alone does not establish whether the repeated selection belongs
 
 Next controlled integration target:
 Select the sole option and inspect the following native selection/log state, including `current` and `logs`, before assigning semantic meaning.
+
+
+## 2026-10-03 — E001-CABT-33: Setup Completion Reaches Draw-Count Selection
+
+After the second observed setup-active selection was resolved, the native engine exposed a new live selection:
+
+- `SelectType.COUNT = 8`
+- `SelectContext.DRAW_COUNT = 38`
+- `minCount = 1`
+- `maxCount = 1`
+- 3 legal options.
+- Each decoded option had `OptionType.NUMBER = 0`.
+
+The accompanying live `current` snapshot showed:
+- `turn = 0`
+- `yourIndex = 1`
+- `firstPlayer = 0`
+- player 0 had `handCount = 6`, `active = [None]`, `deckCount = 47`.
+- player 1 had `handCount = 6`, `active = [None]`, `deckCount = 47`.
+
+The live logs also showed a setup branch in which player 0 initially had `hasBasicPokemon = False`, cards were moved from hand back to deck, a new hand was drawn, then `hasBasicPokemon = True`, followed by active/prize setup. These observations are recorded as raw engine evidence only; the exact rule interpretation of the draw-count branch is not yet finalized.
+
+Measured result:
+- The decoder successfully crossed into COUNT/DRAW_COUNT.
+- Three legal choices were preserved as NUMBER options.
+- The semantic decoder alone does not yet expose the numeric value of each NUMBER option; the raw option must be inspected.
+
+Next controlled integration target:
+Inspect the three raw NUMBER options and record their `number` values without selecting one yet.
