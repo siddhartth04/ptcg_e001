@@ -1352,3 +1352,22 @@ Architecture status:
 - next layer -> policy
 
 The policy boundary is now unit-tested, but it has not yet been connected to the production `agent()` path.
+
+
+## 2026-10-03 — E001-CABT-50: Canonical Agent Path Tests Passing
+
+A fresh repository checkout was tested after routing the production `agent()` path through the canonical `DecisionInput` boundary.
+
+Measured result:
+- Full repository test suite: **18 passed**.
+- No test failures were observed.
+
+Validated canonical path:
+- `agent()` receives a battle observation.
+- `DecisionInput.from_observation()` builds normalized state, decoded legal actions, and selection cardinality.
+- `LegalFirstPolicy` consumes `DecisionInput`.
+- The resulting `Decision` is validated against the CABT selection contract.
+- The returned values remain native CABT option indices.
+
+Architecture milestone:
+The repository now has a single canonical observation -> state/action abstraction -> policy -> validated option-index path. Strategic policy changes can therefore be isolated from simulator parsing and contract logic.
