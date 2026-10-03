@@ -472,3 +472,25 @@ Keep these namespaces strictly separated in the decoder:
 This was a code-level namespace mistake in our probe, not an engine failure and not a simulator finding.
 
 Next step: rerun the same semantic-main probe with `SelectType.MAIN` for the selection type and `OptionType.*` only for option types.
+## 2026-10-03 — E001-CABT-16: Semantic MAIN Decoder Verified
+
+The corrected semantic decoder successfully reached a real Player 0 MAIN state without error.
+
+Observed state:
+- `turn=1`
+- `yourIndex=0`
+- `handCount=7`
+- visible hand contained six copies of Card ID 3 and one Card ID 723.
+
+Observed legal MAIN options:
+- options 0-5 were `OptionType.ATTACH` from `area=2`, indices 0-5, targeting `inPlayArea=4`, `inPlayIndex=0`.
+- option 6 was `OptionType.END`.
+
+This confirms at runtime that the same integer option index can now be translated into a semantic action using the official `OptionType` schema. It also demonstrates that the legal action set is state-dependent: only actions currently legal are exposed.
+
+Important boundary:
+- We have not yet independently mapped numeric `AreaType` values 2 and 4 from the official enum in this ledger.
+- We therefore describe them as source/target areas rather than assigning names such as HAND or ACTIVE until the enum is verified.
+
+Decision:
+The next implementation layer should formalize a typed `LegalAction` representation while preserving the raw option object for execution. Area mappings must be verified before hard-coded semantic labels are introduced.
