@@ -1499,3 +1499,22 @@ The evaluation harness can now retain both the raw engine result and the decoded
 
 Next controlled experiment:
 Run the updated evaluator for a fresh 100-episode LegalFirst baseline. Record player-0/player-1 wins, draws if any, completion rate, invalid actions, and decision-step statistics. This will be the first larger baseline reference before changing the policy.
+
+
+## 2026-10-03 — E001-CABT-56: Fresh Evaluator Import Verified
+
+A fresh runtime import check confirmed that the Kaggle kernel is using the updated evaluation module from the latest repository checkout.
+
+Measured:
+- Runtime module path: `/kaggle/working/ptcg_e001_latest/src/ptcg_agent/evaluation.py`
+- `EpisodeRecord` fields include `winner_index`.
+- Two smoke episodes were evaluated successfully.
+- Episode 1: `result = 1`, `winner_index = 1`.
+- Episode 2: `result = 1`, `winner_index = 1`.
+
+Conclusion:
+- The earlier AttributeError was a stale-module/runtime issue, not a repository implementation defect.
+- The updated evaluator is now confirmed active in the Kaggle kernel.
+
+Next controlled experiment:
+Run the planned 100-episode LegalFirst baseline using the freshly loaded evaluator and report actual player outcome counts, completion rate, invalid actions, and decision-step statistics.
