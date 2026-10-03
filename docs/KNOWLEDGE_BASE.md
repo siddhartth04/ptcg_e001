@@ -1234,3 +1234,21 @@ Pattern/condition discipline:
 
 Next step:
 Stop expanding DRAW_COUNT probes for now. Promote the verified numeric behavior into the semantic action model, while keeping the mulligan interpretation explicitly conditional. Then move back to the main architecture: normalized state + legal-action decoding.
+
+
+## 2026-10-03 — E001-CABT-45: Normalized State Layer Unit Tests Passing
+
+A fresh checkout of the repository was tested after adding the normalized state layer.
+
+Measured result:
+- `pytest -q /kaggle/working/ptcg_e001_latest/tests` -> **14 passed**.
+- The earlier baseline suite had 8 tests; the new normalized-state tests therefore increased the total to 14.
+- No test failures were observed.
+
+Validated state-layer behaviors include:
+- hidden opponent hand remains represented as `None`
+- observed physical card identity preserves `card_id`, `serial`, `player_index`, and zone
+- invalid scalar types are rejected.
+
+Decision:
+The normalized state layer is unit-tested and ready for live native-CABT integration testing. Unit tests alone do not establish full simulator correctness.
