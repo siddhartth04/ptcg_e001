@@ -1,17 +1,37 @@
 """Native CABT baseline evaluation harness.
 
-Run this script only in an environment that provides the native `cg` package.
-The harness records raw terminal result codes; it does not assume the meaning
-of those codes until verified from the engine contract.
+The engine's terminal result code is preserved verbatim and, using the
+verified CABT contract, decoded into a winner index when applicable.
 """
 
 from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Mapping
 
 from ptcg_agent.agent import DEFAULT_DECK, agent
+
+
+# Verified CABT current.result semantics.
+# -1 = ongoing
+#  0 = player 0 wins
+#  1 = player 1 wins
+#  2 = draw
+RESULT_ONGOING = -1
+RESULT_PLAYER_0_WIN = 0
+RESULT_PLAYER_1_WIN = 1
+RESULT_DRAW = 2
+
+
+def winner_from_result(result_code: int | None) -> int | None:
+    """Return winner player index, or None for draw/non-terminal/unknown."""
+
+    if result_code == RESULT_PLAYER_0_WIN:
+        return 0
+    if result_code == RESULT_PLAYER_1_WIN:
+        return 1
+    return None
 
 
 @dataclass(frozen=True)
@@ -20,6 +40,7 @@ class EpisodeRecord:
     steps: int
     terminal: bool
     result_code: int | None
+    winner_index: int | None
     invalid_action: bool
     error: str | None
 
@@ -31,6 +52,7 @@ class EvaluationSummary:
     incomplete: int
     invalid_actions: int
     result_codes: Mapping[str, int]
+    winner_counts: Mapping[str, int]
     records: tuple[EpisodeRecord, ...]
 
 
@@ -60,7 +82,7 @@ def run_episode(
                 raw_result = current.get("result")
                 if isinstance(raw_result, int):
                     result_code = raw_result
-                    if raw_result != -1:
+                    if raw_result != RESULT_ONGOING:
                         terminal = True
                         break
 
@@ -89,6 +111,7 @@ def run_episode(
         steps=steps,
         terminal=terminal,
         result_code=result_code,
+        winner_index=winner_from_result(result_code) if terminal else None,
         invalid_action=invalid_action,
         error=error,
     )
@@ -112,6 +135,12 @@ def evaluate(
         if record.result_code is not None
     )
 
+    winner_counts = Counter(
+        str(record.winner_index)
+        for record in records
+        if record.winner_index is not None
+    )
+
     completed = sum(record.terminal for record in records)
     invalid_actions = sum(record.invalid_action for record in records)
 
@@ -121,5 +150,6 @@ def evaluate(
         incomplete=episodes - completed,
         invalid_actions=invalid_actions,
         result_codes=dict(result_codes),
+        winner_counts=dict(winner_counts),
         records=records,
     )
