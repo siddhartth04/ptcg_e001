@@ -1477,3 +1477,25 @@ Decision:
 
 Next engineering step:
 Extend the evaluation record with an explicit `winner_index` derived only from the verified `current.result` code, and preserve the raw result code alongside it.
+
+
+## 2026-10-03 — E001-CABT-55: Verified Winner Mapping Tests Passing
+
+A fresh repository checkout was tested after updating the evaluation harness to decode verified terminal result codes into winner indices.
+
+Measured result:
+- Full repository test suite: **21 passed**.
+- No test failures were observed.
+
+Newly validated evaluation semantics:
+- `result_code = 0` -> `winner_index = 0`
+- `result_code = 1` -> `winner_index = 1`
+- `result_code = 2` -> `winner_index = None` (draw)
+- `result_code = -1` -> `winner_index = None` (ongoing/non-terminal)
+- `None` -> `winner_index = None`
+
+Architecture status:
+The evaluation harness can now retain both the raw engine result and the decoded winner without relying on the per-player `win` field.
+
+Next controlled experiment:
+Run the updated evaluator for a fresh 100-episode LegalFirst baseline. Record player-0/player-1 wins, draws if any, completion rate, invalid actions, and decision-step statistics. This will be the first larger baseline reference before changing the policy.
