@@ -1860,3 +1860,23 @@ Decision:
 - First rank the 76 manifest rows by `median_avg_score` and `top_avg_score`, then inspect the file listing of the strongest candidate day.
 - Prefer a day whose dataset exposes a manageable subset/partition structure or otherwise allows targeted extraction.
 - Replay selection will optimize for demonstrably strong agents while keeping acquisition and preprocessing bounded.
+
+
+## 2026-10-03 — E001-CABT-64: First Replay Training Day Selected by Manifest Quality
+
+Manifest ranking shows a clear trade-off between top-agent score and overall episode quality.
+
+Key observations:
+- **2026-07-01** has the highest median average score in the 76-day index: **1180.260904**, with top average score **1344.584468** and 5,266 episodes.
+- **2026-07-17** is second by median: **1141.243087**, top **1270.650077**, 4,635 episodes.
+- **2026-07-02** is third by median: **1135.927808**, top **1274.779486**, 5,153 episodes.
+- **2026-06-29** has the highest top average score: **1411.126738**, but its median is substantially lower at **1031.893209**.
+- The only dataset below 5 GB is **2026-06-16** at 2.85 GB, but its median score is only **627.771126**.
+
+Decision:
+- Select **2026-07-01** as the first replay dataset to inspect because it maximizes the manifest's median quality while retaining a high top score and thousands of episodes.
+- Do not claim it contains the globally strongest individual trajectories; the decision is based on the available manifest-level quality signals.
+- Before downloading the 21.47 GB archive, inspect its file listing to determine whether high-score episodes can be targeted without downloading the whole dataset.
+
+Next step:
+Query the Kaggle file listing for `kaggle/pokemon-tcg-ai-battle-episodes-2026-07-01` and inspect its partitions/file structure only.
