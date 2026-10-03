@@ -765,3 +765,29 @@ Do not claim that Card ID 723 instances have distinct serials based on E001-CABT
 
 ### Research discipline
 A test description or print statement is not a result. Only emitted observations count as evidence.
+## 2026-10-03 — E001-CABT-28: Physical Card Identity Verified
+
+Experiment E001-CABT-28 directly inspected all visible instances of Card ID 723 during a verified Mega Signal effect.
+
+Observed instances:
+- `deck[11]` -> Card ID 723, serial 72, Player 1.
+- `deck[18]` -> Card ID 723, serial 70, Player 1.
+- `deck[27]` -> Card ID 723, serial 69, Player 1.
+
+Measured result:
+- 3 physical instances of the same Card ID were visible.
+- Their serials were `[72, 70, 69]`.
+- `len(serials) == len(set(serials))` was `True`.
+- Native card identity for Card ID 723 is Mega Abomasnow ex.
+
+Conclusion:
+Within this observed battle state, Card ID identifies the card definition while serial identifies the physical card instance. This is directly supported by the observed `(cardId, serial, playerIndex)` tuples.
+
+Scope limitation:
+This is an observed-engine invariant for the tested battle state; the implementation should nevertheless preserve both `cardId` and `serial` whenever either is available.
+
+Decision:
+The simulator adapter's internal card-instance representation should retain at least `card_id`, `serial`, and `player_index`, with zone/location maintained separately by the observation.
+
+### Architecture milestone
+We now have enough verified ontology to begin implementing the semantic simulator adapter and typed LegalAction model. The adapter should be designed around immutable raw observations plus decoded views, not a second hand-written game state that can drift from CABT.
