@@ -1330,3 +1330,25 @@ Architecture decision:
 
 Next step:
 Implement a thin decision-input object that bundles normalized `GameState` and `LegalAction[]`, then unit-test that bundle before connecting any strategic policy.
+
+
+## 2026-10-03 — E001-CABT-49: DecisionInput Boundary Tests Passing
+
+A fresh repository checkout was tested after adding the policy decision boundary.
+
+Measured result:
+- Full repository test suite: **17 passed**.
+- No test failures were observed.
+
+The new DecisionInput tests validate:
+- a live-shaped observation can be bundled into normalized `GameState` plus decoded `LegalAction` objects;
+- hidden opponent hand information remains hidden in the bundled state;
+- malformed observations missing `current` are rejected.
+
+Architecture status:
+- CABT observation parsing -> `GameState`
+- CABT legal selection -> `LegalAction[]`
+- both -> `DecisionInput`
+- next layer -> policy
+
+The policy boundary is now unit-tested, but it has not yet been connected to the production `agent()` path.
