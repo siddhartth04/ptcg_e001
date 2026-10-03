@@ -233,3 +233,63 @@ For every meaningful change:
 **Not yet measured:** gameplay win rate, strategic strength, policy quality, search benefit, self-play improvement.
 
 **Current blocker:** map CABT selection enums and contexts from the supplied `api.py`, then build a reliable state-transition driver.
+## 2026-10-03 — Official Option Schema Verified
+
+The supplied competition cg/api.py defines the option schema used by CABT.
+
+### Verified OptionType values
+
+- NUMBER = 0: number/count selection.
+- YES = 1: select yes.
+- NO = 2: select no.
+- CARD = 3: card selection; uses area, index, and playerIndex.
+- TOOL_CARD = 4: attached Pokémon Tool; uses area, index, playerIndex, toolIndex.
+- ENERGY_CARD = 5: attached Energy card; uses area, index, playerIndex, energyIndex.
+- ENERGY = 6: energy selection; includes count for energy units.
+- PLAY = 7: play a card from hand; uses hand index.
+- ATTACH = 8: attach a card to a Pokémon; uses source area/index and target inPlayArea/inPlayIndex.
+- EVOLVE = 9: evolution selection; uses evolved-card location and the in-play evolution source.
+
+The generic Option dataclass also supports: type, number, area, index, playerIndex, toolIndex, energyIndex, count, inPlayArea, inPlayIndex, attackId, cardId, serial, specialConditionType.
+
+### Critical action-decoding rule
+
+The integer returned by an agent is only an index into select.option.
+The semantic action must be decoded from the current select.type, select.context, and selected select.option[index].
+
+### SelectData schema verified
+
+SelectData contains type, context, minCount, maxCount, remainDamageCounter, remainEnergyCost, option, optional deck, optional contextCard, and optional effect.
+
+### Additional verified SelectContext values
+
+- 38 = DRAW_COUNT
+- 39 = DAMAGE_COUNTER_COUNT
+- 40 = REMOVE_DAMAGE_COUNTER_COUNT
+- 41 = IS_FIRST
+- 42 = MULLIGAN
+- 43 = ACTIVATE
+- 44 = FIRST_EFFECT
+- 45 = MORE_DEVOLVE
+- 46 = COIN_HEAD
+- 47 = AFFECT_SPECIAL_CONDITION
+- 48 = RECOVER_SPECIAL_CONDITION
+
+Therefore the observed type=8, context=38 state is definitively a COUNT / DRAW_COUNT decision, with legal count values represented by NUMBER option objects.
+
+### Experiment ledger addition
+
+E001-CABT-08 — Option schema: Read official cg/api.py OptionType, Option, and SelectData definitions. Result: option objects and their fields are source-verified. Decision: never interpret an action from its index alone; use current selection metadata and the option object.
+
+### Current unresolved questions
+
+1. Remaining OptionType definitions after EVOLVE=9.
+2. Exact semantics of MAIN, SKILL, ATTACK, and special-condition option variants.
+3. Why the high-level CABT wrapper previously returned INVALID while native initialization succeeds.
+4. Complete state-transition graph from setup through normal turns.
+5. Terminal-state and reward semantics.
+6. Search/lookahead interface and deterministic replay behavior.
+
+### Next controlled investigation
+
+Inspect the remainder of the official OptionType enum before taking another native action. Then resume from the real draw-count state and select a valid NUMBER option according to the current observation.
