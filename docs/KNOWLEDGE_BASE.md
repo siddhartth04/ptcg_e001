@@ -1956,3 +1956,29 @@ Correction:
 
 Methodological rule:
 - Treat the failed probe as a schema-discovery result, not an error to work around by guessing the structure.
+
+
+## 2026-10-03 — E001-CABT-68: Replay Outer Step = Two-Agent Simultaneous Record
+
+The nested replay inspection established the temporal structure of `steps`:
+
+- `replay["steps"]` contains 206 outer records.
+- Every inspected outer record contains exactly 2 inner dictionaries, one per agent.
+- Each inner dictionary contains `action`, `observation`, `reward`, and `status`; the first inner record can additionally contain `visualize` and an explicit `step`.
+- Only one agent is normally `ACTIVE` at a decision point while the other is `INACTIVE`.
+- Deck-submission actions occur at the start and are full 60-card ID lists, not legal-option indices.
+- Later actions such as `[0]` correspond to the CABT option-index contract.
+- In the inspected episode, step 2 had player 0 active with action `[0]`, while the other agent was inactive; step 4 had the opposite pattern.
+
+Measured conclusion:
+- Replay ingestion must normalize at the **inner agent record** level, not treat the outer list as a single decision.
+- Training examples should be created only from an active agent's decision record.
+- Deck-submission records must be separated from battle-decision records.
+- The chosen action must be aligned with the same inner record's observation, rather than inferred from the next outer timestep.
+
+Information-barrier warning:
+- Replay observations can expose richer state than the live agent, including explicit deck/card information.
+- The replay parser must sanitize those fields before constructing `GameState + LegalAction[]`.
+
+Next controlled step:
+Inspect the first 15 outer steps compactly, printing per-agent status, action shape, select type/context/count, current turn/yourIndex/firstPlayer, and whether replay-only `deck` fields are present. This will establish the precise filtering boundary.
