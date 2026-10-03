@@ -701,3 +701,24 @@ Decision:
 Card-specific search drivers must handle MAIN states explicitly. If the target action is not currently exposed, the driver should either continue via a controlled legal MAIN action (for example END) or report that the target is unavailable in the current state. It must never classify a valid MAIN observation as an unexpected setup state.
 
 Next controlled experiment: build a target-aware traversal that handles setup states, recognizes MAIN, resolves PLAY options against the actual hand, executes only Card ID 1145 when exposed, and otherwise ends the turn to continue the search.
+## 2026-10-03 — E001-CABT-25: Native Mega Signal Candidate Binding
+
+Experiment E001-CABT-25 used the target-aware traversal and only executed PLAY when the current hand actually contained Card ID 1145.
+
+Observed path:
+- The driver reached normal MAIN states and used controlled END actions until the target became legal.
+- At turn 11, Player 0 had Card ID 1145 at `hand[11]`.
+- MAIN option 11 was `PLAY hand[11]`.
+- This was explicitly verified against the actual hand card before execution.
+
+After executing the verified Mega Signal action:
+- CABT returned `CARD + TO_HAND` (`type=1`, `context=7`).
+- `minCount=0`, `maxCount=1`.
+- Exactly one legal CARD option was exposed: `{'type': 3, 'area': 1, 'index': 34, 'playerIndex': 0}`.
+- `select.deck` was present and the current effect was explicitly `Card ID 1145`.
+
+This is the first clean run where the observed follow-up is definitely tied to Mega Signal, eliminating the identity-binding problem from E001-CABT-22.
+
+The actual candidate card at `deck[34]` is visible in the returned deck array as Card ID 723. The native semantic predicate for that candidate has not yet been checked in this experiment.
+
+Decision: the next controlled step is to inspect `followup.deck[34]` and compare its native card metadata (`megaEx`, name, card type) without selecting it. This will directly test the Mega Signal legality invariant.
