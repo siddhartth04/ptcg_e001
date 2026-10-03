@@ -371,3 +371,27 @@ Interpretation: the setup phase is complete on this branch and the engine has en
 Important correction to earlier terminology: this state is not a setup selection. It is the real turn action space. The `MAIN` selector is a higher-level action menu whose options are semantic actions such as ATTACH, PLAY, and END.
 
 Decision: use the verified END option for the next controlled transition. This lets us validate turn handoff without introducing card-effect or attack complexity yet.
+
+## 2026-10-03 — Setup Branch Reaches DRAW_COUNT
+
+Experiment E001-CABT-12 used the state-driven traversal with the official selection mappings.
+
+Observed branch:
+- Step 0: `IS_FIRST` (`type=9`, `context=41`).
+- Step 1: Player 1 `SETUP_ACTIVE_POKEMON`.
+- Step 2: Player 0 `SETUP_ACTIVE_POKEMON`.
+- Step 3: `DRAW_COUNT` (`type=8`, `context=38`) with `minCount=1`, `maxCount=1`.
+- Legal NUMBER options were `0` and `1`.
+
+This differs from the earlier branch that entered a `MAIN` action menu after setup. Therefore setup is **branch-dependent** and the earlier path to MAIN was not sufficient to characterize all setup transitions.
+
+Current interpretation status:
+- `DRAW_COUNT` semantics are source-verified.
+- The exact reason this count decision appears on this branch is not yet established.
+- Do not label it a mulligan decision merely from its presence; `MULLIGAN` has a separate context value of 42.
+
+Decision: add `DRAW_COUNT` as an explicit state in the traversal driver. Before selecting a number, log the current state and recent logs so the causal setup event can be identified empirically.
+
+## Traversal policy update
+
+Setup traversal must be event/state driven, not sequence-count driven. Every transition is selected from the current observation. For each nonterminal state, first decode `(select.type, select.context, option[])`, then choose a test action consistent with `minCount/maxCount`.
