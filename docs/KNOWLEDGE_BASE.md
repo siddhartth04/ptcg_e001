@@ -1819,3 +1819,19 @@ Evaluation decision:
 
 Next strategic phase:
 Move to replay-data acquisition and audit. The target representation is the same online `GameState + LegalAction[]` interface, so replay observations should be converted into the identical decision format before training any behavioral-cloning model.
+
+
+## 2026-10-03 — E001-CABT-62: Replay Index Dataset Availability Verified
+
+The Kaggle Episodes Index dataset was queried with the installed Kaggle CLI.
+
+Observed:
+- Dataset: `kaggle/pokemon-tcg-ai-battle-episodes-index`
+- Available file: `manifest.csv`
+- Reported file size: 13,392 bytes.
+- No replay JSON files are contained directly in this index dataset listing.
+
+Decision:
+- Treat `manifest.csv` as the lightweight discovery layer.
+- Inspect its schema and sample rows before downloading any larger daily replay dataset.
+- Do not assume column names or replay paths until the manifest itself is inspected.
