@@ -1769,3 +1769,25 @@ Strategic implication:
 
 Next experiment:
 Build a side-balanced evaluation protocol using the native `battle_start(..., reverse_player=...)` capability and report outcomes separately for first-player and second-player assignments. Freeze the current LegalFirst policy as the control.
+
+
+## 2026-10-03 — E001-CABT-60: Native reverse_player Semantics Verified
+
+A 10-episode probe was run for each value of native `battle_start(..., reverse_player=...)`.
+
+Observed:
+- With `reverse_player=False`, every sampled episode resolved to `firstPlayer = 0`.
+- With `reverse_player=True`, every sampled episode resolved to `firstPlayer = 1`.
+- `yourIndex` continued to vary between 0 and 1 in both modes.
+
+Measured conclusion:
+- `reverse_player` reliably controls which player index is assigned as the first player.
+- It does NOT force the acting/observable player to a fixed index.
+- This gives us a native mechanism for a side-balanced control without changing the deck.
+
+Methodological implication:
+- Future evaluation should classify each terminal result by resolved first-player status, not by player index alone.
+- A side-balanced control can compare `reverse_player=False` and `reverse_player=True` conditions while keeping the same deck and policy.
+
+Next controlled experiment:
+Run a side-balanced LegalFirst evaluation with equal numbers of `reverse_player=False` and `reverse_player=True` episodes. Report first-player/second-player outcomes separately for each condition and pooled across both conditions.
