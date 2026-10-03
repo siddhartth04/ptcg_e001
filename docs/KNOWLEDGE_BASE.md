@@ -1714,3 +1714,31 @@ No paper result is treated as evidence that the corresponding method will work o
 4. a measured delta against the frozen control.
 
 The 2026 competition writeups are domain evidence; the academic papers are methodological evidence. They must not be conflated.
+
+
+## 2026-10-03 — E001-CABT-58: First-Player Control Probe Invalidated Due to Sentinel Capture Bug
+
+The 200-episode first-player control probe reported:
+- first-player wins: 0
+- second-player wins: 200
+
+This measurement is **invalid**.
+
+Root cause:
+- At battle start, CABT exposes `current.firstPlayer = -1` before setup resolves.
+- The probe stored `first_player` only when it was `None`, so it captured the initial sentinel `-1` and never updated it after the engine resolved the actual first player.
+- The calculation `winner != first_player` therefore classified every decisive result as "second-player", because neither winner index 0 nor 1 equals -1.
+
+This is directly consistent with E001-CABT-46, which previously measured battle-start `first_player = -1`.
+
+External sanity check:
+- A Kaggle discussion analyzing 15,225 native CABT self-play games between the four sample decks reported a first-player win rate of 51.5%, demonstrating that a universal 0% first-player rate is not a credible baseline result. This external figure is a separate deck/policy experiment and is used only as a sanity check, not as our result. citeturn803558search4
+- The current Playground is explicitly a dynamic agent-vs-agent CABT environment where games are evaluated by episode outcomes and skill ratings. citeturn803558search0
+
+Correction:
+- Do not use the 200-episode first-player result as data.
+- Re-run the control while waiting until `current.firstPlayer` is resolved to 0 or 1, then record terminal winner vs resolved first player.
+- Prefer explicitly storing the resolved value from a post-setup observation rather than relying on the initial battle-start snapshot.
+
+Methodological lesson:
+Sentinel values must be handled explicitly in all future evaluation code. State fields that can transition from sentinel -> resolved must be sampled at the time their semantics are actually available.
