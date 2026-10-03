@@ -1092,3 +1092,31 @@ Why this remains unverified:
 
 Next controlled experiment:
 Across fresh episodes, count `hasBasicPokemon = False` setup events per opponent before DRAW_COUNT and compare that count with the maximum available `number` option. Do not select a DRAW_COUNT option.
+
+
+## 2026-10-03 — E001-CABT-40: DRAW_COUNT Option Range Matches Opponent Mulligans + 1
+
+The 30-episode correlation probe produced 17 usable DRAW_COUNT samples. The earlier summary comparison used the wrong equality (`mulligans == max_number`) and therefore reported `0/17`. The informative invariant is instead:
+
+`max_number == mulligans + 1`
+
+Observed samples:
+- 0 mulligans -> maximum option 1
+- 1 mulligan -> maximum option 2
+- 2 mulligans -> maximum option 3
+- 4 mulligans -> maximum option 5
+
+Across all 17 observed DRAW_COUNT samples:
+- `max_number == mulligans + 1` matched **17/17**.
+- The available raw options were contiguous from 0 through the maximum, e.g. `[0,1]`, `[0,1,2]`, `[0,1,2,3]`, and `[0,1,2,3,4,5]`.
+
+Measured conclusion:
+- The DRAW_COUNT option range is strongly and directly correlated in this probe with the opponent's number of `hasBasicPokemon = False` events, with one additional option beyond that count.
+- This is much stronger evidence than the prior hypothesis that the numeric value itself was the number of cards to draw.
+
+Still unverified:
+- The exact semantic meaning of the selected numeric value (especially why the domain is 0..mulligans+1) has not yet been established.
+- We should not infer the effect from the option domain alone.
+
+Next controlled experiment:
+Find a DRAW_COUNT state with exactly one recorded opponent mulligan (options 0,1,2), select the maximum value 2, and measure the complete immediate state/log delta. Compare it with the same branch selecting 0.
