@@ -395,3 +395,36 @@ Decision: add `DRAW_COUNT` as an explicit state in the traversal driver. Before 
 ## Traversal policy update
 
 Setup traversal must be event/state driven, not sequence-count driven. Every transition is selected from the current observation. For each nonterminal state, first decode `(select.type, select.context, option[])`, then choose a test action consistent with `minCount/maxCount`.
+
+## 2026-10-03 — Mulligan Compensation Draw State and Normal Main Menu
+
+Experiment E001-CABT-13 reached `DRAW_COUNT` and selected `NUMBER 0`.
+
+Observed causal evidence in the logs immediately before the draw-count state:
+- `HAS_BASIC_POKEMON` for Player 0 was false.
+- Cards were moved from Player 0's hand back into the deck.
+- A shuffle event occurred.
+- A second basic-Pokémon check became true.
+- Face-down card movement events followed.
+
+This strongly suggests the draw-count state is associated with the no-Basic-Pokémon / mulligan setup flow. However, the exact game rule meaning of the selected count has not yet been formally proven from source comments, so it remains an evidence-backed hypothesis rather than a final semantic claim.
+
+Selecting `NUMBER 0` was accepted. The next state was:
+- `SETUP_BENCH_POKEMON`, `minCount=0`, `maxCount=1`.
+
+Selecting the empty bench choice was accepted and advanced to:
+- `turn=1`
+- `yourIndex=0`
+- `firstPlayer=0`
+- `result=-1`
+- `MAIN` selection with 8 legal options.
+
+That main menu contained:
+- options 0-2: `PLAY` from hand indices 0-2.
+- options 3-6: `ATTACH` actions from hand to the Active Pokémon.
+- option 7: `END`.
+
+Decision: the setup-to-normal-turn transition is now reliably traversed using current-state decoding. The next controlled test should select the verified `END` option and observe the turn handoff.
+
+### Research discipline note
+Do not encode the hypothesized mulligan/draw relationship into the agent yet. First collect multiple controlled episodes and correlate `MULLIGAN`, `DRAW_COUNT`, logs, and resulting hand/deck changes.
