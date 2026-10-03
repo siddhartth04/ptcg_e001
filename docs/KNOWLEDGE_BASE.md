@@ -558,3 +558,33 @@ The semantic LegalAction representation should retain both source/target locatio
 
 ### Next controlled experiment
 Test a PLAY action using one of the currently exposed PLAY options. Choose an Item/basic card only if its option is actually exposed by CABT; do not infer playability from card type alone.
+## 2026-10-03 — E001-CABT-19: PLAY Can Create a Follow-Up Deck Selection
+
+Experiment E001-CABT-19 executed a PLAY option from a verified MAIN state.
+
+Before PLAY:
+- `turn=1`, `yourIndex=0`, `handCount=7`.
+- MAIN exposed four PLAY options among its legal actions.
+- The selected PLAY action was `option[0] -> PLAY hand[0]`, where hand[0] was Card ID 1145.
+
+After PLAY:
+- `handCount` became 6.
+- The observation returned `select.type=1` (`CARD`).
+- The selection context was `7` (`TO_HAND`).
+- `minCount=0`, `maxCount=1`.
+- The legal options were CARD objects located in `area=1` (`DECK`) at indices 7, 13, and 29.
+- The observation included a populated `deck` list and `effect` identifying Card ID 1145 as the effect currently being processed.
+- A recent log recorded a skill/effect event for Card ID 1145.
+
+This directly verifies that a MAIN `PLAY` action can create a **multi-stage action sequence**: selecting the card to play is not necessarily the entire effect. CABT can immediately expose a follow-up selection driven by the played card's effect.
+
+Important consequence for architecture:
+- A LegalAction abstraction must support the current selection as a transient sub-action within a larger card-effect sequence.
+- The environment state, including `select.deck` and `select.effect`, must be preserved.
+- A policy cannot assume that every PLAY action returns directly to MAIN.
+
+Unresolved in this experiment:
+- We have not yet decoded the exact game-card meaning of Card ID 1145 from the card reference data.
+- We have not yet tested whether choosing one of the deck options or choosing the allowed empty selection leads to different follow-up states.
+
+Decision: for the next controlled test, choose the first exposed DECK card option (`select.option[0]`) so that we can observe the successful completion of this multi-stage PLAY effect. Do not infer strategic quality from this choice.
