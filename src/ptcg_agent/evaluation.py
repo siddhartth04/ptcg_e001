@@ -11,8 +11,6 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from cg import game
-
 from ptcg_agent.agent import DEFAULT_DECK, agent
 
 
@@ -42,6 +40,8 @@ def run_episode(
     deck1: list[int] | None = None,
     max_steps: int = 1000,
 ) -> EpisodeRecord:
+    from cg import game
+
     d0 = list(DEFAULT_DECK if deck0 is None else deck0)
     d1 = list(DEFAULT_DECK if deck1 is None else deck1)
 
