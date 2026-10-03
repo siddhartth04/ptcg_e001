@@ -1150,3 +1150,33 @@ Important remaining ambiguity:
 
 Next controlled experiment:
 Repeat the one-mulligan case, select number 2, and print the complete post-selection `select`, `current`, and newly emitted logs. Do not make a further selection.
+
+
+## 2026-10-03 — E001-CABT-42: Post-DRAW_COUNT State Returns to Optional Bench Setup
+
+Following the controlled one-mulligan case, selecting DRAW_COUNT `number = 2` produced:
+
+- player 0 hand count: 6 -> 8
+- player 0 deck count: 47 -> 45
+- turn remained 0
+- player 0 active remained unset at this snapshot
+- opponent state remained unchanged.
+
+The immediate next selection was:
+- `SelectType.CARD = 1`
+- `SelectContext.SETUP_BENCH_POKEMON = 2`
+- `minCount = 0`
+- `maxCount = 1`
+- one legal option targeting hand index 7.
+
+Measured conclusion:
+- DRAW_COUNT is an intermediate setup-stage draw decision, not a turn-start transition.
+- After the draw decision, CABT can return to optional bench selection while remaining on `turn = 0`.
+- The newly drawn cards remain in hand and can therefore participate in subsequent setup decisions.
+
+Semantic status:
+- The numeric choice is directly demonstrated to control the number of cards added to the acting player's hand in this branch.
+- The exact rule-level relationship between the option domain, opponent mulligans, and the player's permitted choice remains to be modeled cautiously.
+
+Next controlled experiment:
+Use the same one-mulligan condition but select DRAW_COUNT `number = 0`, then inspect the immediate hand/deck delta and next selection. This gives a direct within-branch contrast against the `number = 2` result.
