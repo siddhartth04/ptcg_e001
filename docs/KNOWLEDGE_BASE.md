@@ -646,3 +646,23 @@ We now have three distinct semantic layers:
 3. External/reference card catalog used for analysis, feature engineering, and audit.
 
 Any disagreement between layer 2 and layer 3 should be logged as a data-quality discrepancy, not silently reconciled.
+## 2026-10-03 — E001-CABT-22: PLAY Identity Binding Error
+
+Experiment E001-CABT-22 attempted to validate Mega Signal candidate semantics by selecting the first PLAY option from a fresh random battle and then assuming the resulting effect was Mega Signal.
+
+Observed result:
+- The resulting state was already a `MAIN` selection.
+- It contained ATTACH options and END.
+- `select.effect` was `None`.
+- The follow-up options were `ATTACH`, not `CARD + TO_HAND` deck-search options.
+
+Conclusion:
+The experiment did not establish anything about Mega Signal candidates because the code failed to verify that the selected PLAY option actually referenced Card ID 1145. The fresh battle's hand/action set was randomized, so the first PLAY option can represent a different card.
+
+This is an important research correction: semantic labels must be bound to the actual selected card identity before interpreting an effect. A variable or experiment name such as `mega_signal_followup` is not evidence.
+
+Decision:
+For card-specific experiments, first enumerate the acting player's hand and all legal PLAY options, resolve each PLAY option's hand index to its actual Card ID, and only execute the option when the target Card ID matches the intended card.
+
+### Experiment status
+E001-CABT-22 is **invalid as a Mega Signal test** and must not be used as evidence for or against the Mega Signal candidate hypothesis.
