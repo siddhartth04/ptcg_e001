@@ -666,3 +666,22 @@ For card-specific experiments, first enumerate the acting player's hand and all 
 
 ### Experiment status
 E001-CABT-22 is **invalid as a Mega Signal test** and must not be used as evidence for or against the Mega Signal candidate hypothesis.
+## 2026-10-03 — E001-CABT-23: Mega Signal Action Identity Verified
+
+Experiment E001-CABT-23 searched fresh native battles until the actual acting-player hand and legal MAIN action were inspected before execution.
+
+Target card:
+- Card ID 1145 = Mega Signal.
+
+Observed successful binding:
+- `hand[0]` contained Card ID 1145.
+- MAIN option `[0]` was `{'type': 7, 'index': 0}`.
+- Therefore option 0 was proven to mean `PLAY hand[0]` for this specific state.
+- A separate PLAY option targeted Card ID 1262, demonstrating why selecting the first PLAY option without checking identity is unsafe.
+
+Decision:
+Card-specific experiments must resolve `option.index` against the current acting player's hand and verify the Card ID before executing or interpreting the action.
+
+E001-CABT-22 remains invalid as a Mega Signal test; E001-CABT-23 is the first clean identity-bound Mega Signal setup.
+
+Next controlled experiment: execute exactly the verified Mega Signal PLAY option and inspect its follow-up selection and candidate card identities without selecting a candidate.
