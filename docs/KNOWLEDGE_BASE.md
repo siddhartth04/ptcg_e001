@@ -968,3 +968,37 @@ Methodological decision:
 Switch from path-forcing to branch discovery. Sample fresh native battles and record the first selection type/context after setup completion. Continue until a genuine DRAW_COUNT occurrence is observed, then inspect its raw NUMBER options without selecting one.
 
 No numeric interpretation of DRAW_COUNT has been established yet.
+
+
+## 2026-10-03 — E001-CABT-36: DRAW_COUNT Raw Number Choices Captured
+
+A 20-episode native-battle branch-discovery probe was run using the current verified setup traversal.
+
+Measured result:
+- DRAW_COUNT occurred in 14 of 20 episodes under this exact probe procedure.
+- 6 episodes reached MAIN before DRAW_COUNT.
+- This 14/20 figure is an observation of this probe, not a general probability estimate.
+
+Every observed DRAW_COUNT selection had:
+- `SelectType.COUNT = 8`
+- `SelectContext.DRAW_COUNT = 38`
+- `minCount = 1`
+- `maxCount = 1`
+- `OptionType.NUMBER = 0` for every option.
+
+Observed raw numeric choices included:
+- `[0, 1]`
+- `[0, 1, 2]`
+- `[0, 1, 2, 3]`
+- `[0, 1, 2, 3, 4]`
+- `[0, 1, 2, 3, 4, 5]`
+
+Thus the option's `number` field is demonstrably part of the executable choice payload for DRAW_COUNT.
+
+What remains unverified:
+- The exact semantic meaning of the selected number has not yet been established.
+- The varying maximum number has not yet been causally tied to a specific game-state quantity.
+- No strategic conclusion should be drawn from the observed 14/20 frequency.
+
+Next controlled integration target:
+Select a known DRAW_COUNT numeric option in a fresh episode and compare the immediate before/after `current`, `logs`, hand count, and deck count to identify the engine-level effect of the chosen number.
