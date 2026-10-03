@@ -1002,3 +1002,37 @@ What remains unverified:
 
 Next controlled integration target:
 Select a known DRAW_COUNT numeric option in a fresh episode and compare the immediate before/after `current`, `logs`, hand count, and deck count to identify the engine-level effect of the chosen number.
+
+
+## 2026-10-03 — E001-CABT-37: DRAW_COUNT Number 0 Transition Measured
+
+A fresh native battle reached `COUNT / DRAW_COUNT` with options `[0, 1, 2]`. The probe selected the raw `number = 0` option.
+
+Before selection:
+- `turn = 0`
+- acting player `yourIndex = 0`
+- player 0: `handCount = 6`, `deckCount = 47`, `active = [None]`
+- player 1: `handCount = 6`, `deckCount = 47`, `active = [None]`
+
+After selecting number 0:
+- `turn = 1`
+- acting player remains `yourIndex = 0`
+- player 0 active became Card ID 721, serial 4, HP 150/150
+- player 1 active became Card ID 722, serial 65, HP 90/90
+- player 0 `handCount = 7`
+- player 0 `deckCount = 46`
+- player 0 received Card ID 1121, serial 15 in hand
+- opponent hand remained hidden.
+
+Measured change:
+- Player 0 hand increased by exactly 1 and deck decreased by exactly 1.
+- The battle advanced from setup (`turn = 0`) to `turn = 1`.
+- No new logs were emitted by the returned `logs` slice used in this probe.
+
+Interpretation status:
+- Directly measured: selecting number 0 is followed by one card entering the active player's hand and a transition to turn 1.
+- Plausible but not yet isolated: number 0 may mean zero additional compensation/mulligan cards, with the observed one-card increase being the normal turn draw.
+- The experiment does NOT establish that the number field itself caused the one-card draw.
+
+Next controlled experiment:
+Repeat on a genuine DRAW_COUNT branch, select `number = 1), and compare hand/deck changes against the number-0 baseline. This isolates whether the numeric choice changes the draw amount.
