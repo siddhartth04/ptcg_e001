@@ -11,8 +11,30 @@ from ptcg_agent.agent import DEFAULT_DECK, agent
 from ptcg_agent.contract import ContractError
 
 
+REPO_ROOT = Path(__file__).parents[1]
+DECK_PATH = REPO_ROOT / "deck.csv"
+
+
+def _read_deck_csv() -> list[int]:
+    return [
+        int(line.strip())
+        for line in DECK_PATH.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
 def test_default_deck_is_60_cards() -> None:
     assert len(DEFAULT_DECK) == 60
+
+
+def test_deck_csv_is_60_cards() -> None:
+    card_ids = _read_deck_csv()
+    assert len(card_ids) == 60
+    assert all(card_id > 0 for card_id in card_ids)
+
+
+def test_default_deck_matches_deck_csv() -> None:
+    assert _read_deck_csv() == list(DEFAULT_DECK)
 
 
 def test_deck_phase_returns_60_card_ids() -> None:
