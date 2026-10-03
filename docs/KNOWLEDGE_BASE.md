@@ -1898,3 +1898,43 @@ Decision:
 - Use one individual JSON shard as a schema probe.
 - Inspect its top-level structure, replay length, observation fields, action representation, and any embedded metadata before designing replay ingestion.
 - Do not assume the filename encodes score or quality.
+
+
+## 2026-10-03 — E001-CABT-66: First Real Replay JSON Schema Identified
+
+Replay shard `82933532.json` from the selected 2026-07-01 dataset was downloaded and parsed successfully.
+
+Top-level replay structure:
+- keys include `configuration`, `description`, `id`, `info`, `module_version`, `name`, `rewards`, `schema_version`, `specification`, `statuses`, `steps`, `title`, and `version`.
+- `name = "cabt"`.
+- `steps` is a list with 206 entries in this shard.
+- `statuses = ["DONE", "DONE"]`.
+- `rewards = [1, -1]` for the two agents in this replay.
+- `configuration.seed = 422649513`.
+- `info` contains agent names, episode ID, and team names.
+
+The embedded `specification` explicitly describes:
+- agent `action` as a list of option indices;
+- observation fields including `step`, `remainingOverageTime`, and the CABT observation object;
+- reward semantics as `-1 = Lost, 1 = Won, 0 = Draw`.
+
+A step contains at least:
+- `action`
+- `info`
+- `observation`
+- `reward`
+- `status`
+- `visualize`
+
+Critical observation:
+- The replay's `visualize` and initial `current` preview can contain substantially more information than an online agent should receive, including explicit full deck/card objects for players.
+- This must NOT be copied directly into the online policy input.
+- Replay preprocessing must reconstruct the same information boundary as the live CABT agent: public/current observable state + the currently legal `select` options, while excluding replay-only hidden/private information and future state.
+- Therefore, replay data is not automatically a clean supervised-learning feature table; it requires an information-barrier audit.
+
+Research implication:
+- The top-level `action` field appears compatible with our existing option-index execution contract.
+- The next question is whether each decision step contains both the complete legal `select.option` list and the agent's chosen `action` indices in the same temporal record.
+
+Next controlled step:
+Inspect the first several `steps` entries and print only step number, status, reward, action, observation keys, select metadata, and current-player index. Do not print full hidden deck/card objects again.
