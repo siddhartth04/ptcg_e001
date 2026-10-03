@@ -1252,3 +1252,28 @@ Validated state-layer behaviors include:
 
 Decision:
 The normalized state layer is unit-tested and ready for live native-CABT integration testing. Unit tests alone do not establish full simulator correctness.
+
+
+## 2026-10-03 — E001-CABT-46: Live Normalized State Integration at Battle Start
+
+The normalized `GameState.from_current()` parser was run against the actual native CABT `current` object returned immediately from `battle_start()`.
+
+Measured live state:
+- `turn = 0`
+- `your_index = 0`
+- `first_player = -1`
+- `round = 1`
+- 2 players were exposed.
+- Player 0: `hand_count = 0`, hand visible, `deck_count = 60`, no active card, no bench cards.
+- Player 1: `hand_count = 0`, hand hidden (`None`), `deck_count = 60`, no active card, no bench cards.
+
+Measured conclusion:
+- The normalized state layer successfully parsed a real pre-setup native observation.
+- The engine can expose a pre-selection state with `first_player = -1`; therefore the state representation must preserve this sentinel rather than assuming first-player assignment is immediately available.
+- Hidden-information handling was preserved: player 1 hand remained unavailable while its hand count was exposed.
+
+Important scope note:
+- This is a battle-start snapshot before the setup decisions are resolved. It should not be conflated with the later setup state where `first_player`, hands, active Pokémon, and prizes have been populated.
+
+Next controlled integration target:
+Advance only through the verified initial YES/NO selection and parse the resulting live `current` into `GameState`, comparing the normalized fields with the raw observation.
