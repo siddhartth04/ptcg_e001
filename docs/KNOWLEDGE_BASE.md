@@ -1742,3 +1742,30 @@ Correction:
 
 Methodological lesson:
 Sentinel values must be handled explicitly in all future evaluation code. State fields that can transition from sentinel -> resolved must be sampled at the time their semantics are actually available.
+
+
+## 2026-10-03 — E001-CABT-59: Corrected First-Player Control Measured
+
+The corrected 200-episode control successfully resolved `current.firstPlayer` after the initial `-1` sentinel.
+
+Measured:
+- Episodes: 200
+- First-player wins: 117
+- Second-player wins: 83
+- First-player win frequency: 117/200 = 58.5%
+- Second-player win frequency: 83/200 = 41.5%
+
+Methodological status:
+- This result supersedes the invalid E001-CABT-58 result.
+- The measurement is valid under the corrected sentinel handling.
+- This is a property of the current LegalFirst policy + identical-deck setup + native CABT evaluation procedure. It is not a universal estimate of the game's first-player advantage.
+
+Approximate descriptive uncertainty:
+- A simple binomial 95% interval around 58.5% is roughly 51.7%–65.3%. This is only a descriptive interval and does not model episode dependence or other simulator-specific effects.
+
+Strategic implication:
+- The earlier 100-episode baseline of Player-0 wins 60 / Player-1 wins 40 cannot be interpreted as policy strength because player 0 and first-player status are different variables.
+- Future policy comparisons must stratify outcomes by resolved first-player status, and preferably use side-balanced/pairwise evaluation when the engine interface allows it.
+
+Next experiment:
+Build a side-balanced evaluation protocol using the native `battle_start(..., reverse_player=...)` capability and report outcomes separately for first-player and second-player assignments. Freeze the current LegalFirst policy as the control.
