@@ -350,3 +350,24 @@ Decision:
 Do not hard-code the number or identity of setup transitions. Build the traversal around the **current observation's `select.context`, `select.type`, option schema, and cardinality** at every step.
 
 Next diagnostic: trace every setup selection before acting, explicitly recognize `IS_FIRST`, `MULLIGAN`, `SETUP_ACTIVE_POKEMON`, `SETUP_BENCH_POKEMON`, and stop when `DRAW_COUNT` is reached. Record the actual branch rather than assuming a fixed setup path.
+
+## 2026-10-03 — State-Driven Traversal Reached MAIN Turn State
+
+Experiment E001-CABT-11 used a state-driven setup tracer instead of hard-coded action counts.
+
+Observed fresh battle branch:
+- Step 0: `type=YES_NO`, `context=IS_FIRST`, options YES/NO; the tracer chose YES.
+- Step 1: `type=CARD`, `context=SETUP_ACTIVE_POKEMON`, Player 0; one legal option.
+- Step 2: `type=CARD`, `context=SETUP_ACTIVE_POKEMON`, Player 1; one legal option.
+- Step 3: `type=MAIN`, `context=MAIN`, `minCount=1`, `maxCount=1`.
+
+The step-3 legal options were:
+- indices 0-4: `ATTACH` actions from hand to the Active Pokémon.
+- index 5: `PLAY` a card from hand (`index=6`).
+- index 6: `END` the turn.
+
+Interpretation: the setup phase is complete on this branch and the engine has entered a normal main-action state for the starting player.
+
+Important correction to earlier terminology: this state is not a setup selection. It is the real turn action space. The `MAIN` selector is a higher-level action menu whose options are semantic actions such as ATTACH, PLAY, and END.
+
+Decision: use the verified END option for the next controlled transition. This lets us validate turn handoff without introducing card-effect or attack complexity yet.
