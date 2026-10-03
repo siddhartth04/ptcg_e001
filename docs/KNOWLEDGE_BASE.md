@@ -940,3 +940,31 @@ Correction:
 
 Next controlled integration target:
 Repeat the traversal while taking the zero-selection branch at optional setup-bench prompts and stop immediately when DRAW_COUNT appears.
+
+
+## 2026-10-03 — E001-CABT-35: DRAW_COUNT Is a Conditional Setup Branch
+
+A second controlled traversal using the optional-bench no-op policy again did not reach `DRAW_COUNT`.
+
+Observed path:
+- Step 0: `YES_NO / IS_FIRST`
+- Step 1: `CARD / SETUP_ACTIVE_POKEMON`
+- Step 2: `CARD / SETUP_ACTIVE_POKEMON`
+- Step 3: `MAIN / MAIN`
+
+The resulting MAIN selection contained:
+- ATTACH at hand index 2
+- ATTACH at hand index 4
+- ATTACH at hand index 6
+- END
+
+Measured result:
+- The path reached normal MAIN directly after active setup.
+- Therefore `DRAW_COUNT` is not a mandatory successor of setup-active selection.
+- The earlier observed `DRAW_COUNT` state is best treated as a conditional branch until a controlled trigger is isolated.
+- We should not keep forcing a traversal path toward DRAW_COUNT by assuming fixed setup transition sequences.
+
+Methodological decision:
+Switch from path-forcing to branch discovery. Sample fresh native battles and record the first selection type/context after setup completion. Continue until a genuine DRAW_COUNT occurrence is observed, then inspect its raw NUMBER options without selecting one.
+
+No numeric interpretation of DRAW_COUNT has been established yet.
