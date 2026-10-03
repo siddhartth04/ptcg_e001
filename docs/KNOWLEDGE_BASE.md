@@ -791,3 +791,17 @@ The simulator adapter's internal card-instance representation should retain at l
 
 ### Architecture milestone
 We now have enough verified ontology to begin implementing the semantic simulator adapter and typed LegalAction model. The adapter should be designed around immutable raw observations plus decoded views, not a second hand-written game state that can drift from CABT.
+
+## 2026-10-03 — E001-CABT-29: Semantic Action Decoder Tests
+
+Repository test suite was executed after adding `src/ptcg_agent/actions.py` and `tests/test_actions.py`.
+
+Measured result:
+- `pytest -q` => **8 passed**.
+- No test failures were observed.
+
+The existing 6 contract tests plus the new semantic action decoder coverage therefore pass together.
+
+Decision:
+- Treat the semantic decoder as the current tested foundation for the next policy-layer integration.
+- Do not claim runtime-game correctness from unit tests alone; the decoder still needs integration validation against real CABT observations.
