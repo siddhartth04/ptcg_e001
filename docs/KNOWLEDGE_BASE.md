@@ -527,3 +527,34 @@ We now have source-verified mappings for:
 - card/field location (`AreaType`).
 
 This is sufficient to begin implementing the reusable `LegalAction` abstraction while keeping raw CABT dictionaries preserved for exact execution/debugging.
+## 2026-10-03 — E001-CABT-18: ATTACH Transition Verified
+
+Experiment E001-CABT-18 executed the first legal ATTACH action from a real MAIN state.
+
+Before ATTACH:
+- `turn=1`
+- `yourIndex=0`
+- Active Pokémon: Card ID 721, HP 150/150.
+- Hand contained seven cards.
+- MAIN exposed multiple ATTACH actions, PLAY actions, and END.
+
+Selected action:
+- MAIN option 0.
+- Raw option: `type=8`, `area=2`, `index=1`, `inPlayArea=4`, `inPlayIndex=0`.
+- With the verified AreaType enum, this decodes to ATTACH from `HAND[1]` to `ACTIVE[0]`.
+
+After ATTACH:
+- `energyAttached=True`.
+- The selected hand card disappeared from the hand.
+- The Active Pokémon gained one Energy entry and one `energyCards` entry.
+- The next MAIN menu contained the remaining PLAY actions plus END; the manual Energy attachment was no longer offered as an ATTACH action.
+- Recent logs contained a log entry with the attached card and its target Pokémon.
+
+Directly observed state transition:
+`Hand[1] -> Active[0].energyCards`, with the turn-level `energyAttached` flag changing from false to true.
+
+Decision:
+The semantic LegalAction representation should retain both source/target locations and the underlying option index. After execution, the environment state should be treated as authoritative rather than inferred from the action.
+
+### Next controlled experiment
+Test a PLAY action using one of the currently exposed PLAY options. Choose an Item/basic card only if its option is actually exposed by CABT; do not infer playability from card type alone.
