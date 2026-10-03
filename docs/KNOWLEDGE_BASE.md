@@ -1982,3 +1982,38 @@ Information-barrier warning:
 
 Next controlled step:
 Inspect the first 15 outer steps compactly, printing per-agent status, action shape, select type/context/count, current turn/yourIndex/firstPlayer, and whether replay-only `deck` fields are present. This will establish the precise filtering boundary.
+
+
+## 2026-10-03 — E001-CABT-69: Replay Information Boundary and Action Alignment Audited
+
+The compact audit of the first 15 outer replay records establishes the practical training-data boundary.
+
+Observed:
+- Outer replay steps contain two per-agent records.
+- An active agent's inner record contains both its `action` and its corresponding `observation` with `select`.
+- Inactive-agent records can have `action=[]` and `select=None`.
+- Deck-submission records are distinguishable because the action is a 60-card ID list.
+- Battle decisions use option-index lists such as `[0]`, `[1]`, or `[1,0]`.
+- The active player's current view exposes that player's hand while the opponent hand is hidden.
+- The online-shaped `current.players[*]` view in the audited records had no `deck` field; the full deck information seen earlier came from replay `visualize`, which is excluded from the policy input.
+- Select metadata is present with type/context/minCount/maxCount/option_count on active decision records.
+
+Direct alignment examples:
+- Outer step 2: player 0 was ACTIVE, action `[0]`, with `CARD / SETUP_ACTIVE_POKEMON` and 4 legal options.
+- Outer step 4: player 1 was ACTIVE, action `[1]`, with setup-active/bench selections exposed in the corresponding observation.
+- Later active records similarly show battle option-index actions paired with their legal `select` object.
+
+Decision:
+The replay-to-BC example should be constructed from an active inner record as:
+`observation(current, select) -> action`.
+Exclude:
+- inactive records,
+- deck-submission records,
+- replay `visualize` content,
+- any private/future state not present in the online observation boundary.
+
+The canonical online feature target remains:
+`GameState + LegalAction[] -> chosen option indices`.
+
+Next controlled step:
+Run an offline validation over the entire sampled replay shard to count active battle-decision records, deck-submission records, inactive records, and whether every battle action satisfies the contemporaneous select cardinality/range contract. Do not train a model yet.
