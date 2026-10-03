@@ -588,3 +588,35 @@ Unresolved in this experiment:
 - We have not yet tested whether choosing one of the deck options or choosing the allowed empty selection leads to different follow-up states.
 
 Decision: for the next controlled test, choose the first exposed DECK card option (`select.option[0]`) so that we can observe the successful completion of this multi-stage PLAY effect. Do not infer strategic quality from this choice.
+## 2026-10-03 — E001-CABT-20: PLAY Effect Completion Verified
+
+Experiment E001-CABT-20 completed the follow-up selection created by PLAYing Card ID 1145.
+
+Observed sequence:
+- MAIN option selected: `PLAY hand[0]`, where hand[0] was Card ID 1145.
+- CABT generated `CARD + TO_HAND` with `minCount=0`, `maxCount=1` and four legal cards from the deck.
+- The first legal deck card option was selected.
+
+After the effect:
+- Card ID 1145 was in the discard pile.
+- Player hand count increased from 6 to 7.
+- Deck count decreased from 46 to 45.
+- The selected deck card, Card ID 723, moved from deck to hand.
+- Recent logs explicitly contained a `MOVE_CARD` event for Card ID 723 from `DECK` to `HAND`, followed by the effect completion log.
+- CABT returned to a normal `MAIN` action menu.
+
+This verifies that a card PLAY can have a multi-step effect whose final state mutation is entirely observable through the returned state and logs.
+
+### State-machine consequence
+A gameplay driver must support a loop of arbitrary selections until the card effect is complete. It must not assume `PLAY -> MAIN`.
+
+### Architecture consequence
+The future environment adapter should record, for every transition:
+- pre-observation
+- decoded selection metadata
+- chosen option index
+- chosen semantic option
+- post-observation
+- logs emitted by the transition.
+
+Decision: the simulator adapter is now the next engineering priority. Once this trace layer is implemented and tested, strategic policies can be plugged into the same environment without rewriting the execution logic.
